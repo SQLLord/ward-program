@@ -109,12 +109,19 @@ Both App Services (API and frontend) share a single App Service Plan to reduce c
 | Setting | Value |
 |---------|-------|
 | Server name | ward-programs-sql (becomes `ward-programs-sql.database.windows.net`) |
-| Authentication | SQL authentication (for local dev) + Microsoft Entra (for production) |
+| Authentication | Both SQL authentication and Microsoft Entra authentication |
 | Database name | ward_programs |
 | Service tier | Basic or Standard S0 |
 
-3. Under **Networking**, add your current IP to the firewall rules so you can run DB scripts from your machine. Also enable **Allow Azure services and resources to access this server** so the App Service can connect.
-4. Note the **server name**, **database name**, **admin username**, and **password** — needed for local development.
+3. **Configure Microsoft Entra authentication** — this is required before Managed Identity will work:
+   - Go to your SQL Server → **Settings → Microsoft Entra ID**
+   - Click **Set admin** and select an Entra account (a user or group from your Azure AD tenant) to be the Entra admin for the server
+   - Click **Save**
+   - This binds the SQL Server to your Entra tenant and enables `FROM EXTERNAL PROVIDER` user creation
+
+4. Under **Networking**, add your current IP to the firewall rules so you can run DB scripts from your machine. Also enable **Allow Azure services and resources to access this server** so the App Service can connect.
+
+5. Note the **server name**, **database name**, **SQL admin username**, and **SQL admin password** — needed for local development.
 
 ### 4. Azure Blob Storage
 
@@ -186,20 +193,22 @@ In production the API connects to Azure SQL using **System-assigned Managed Iden
 
 1. Go to your **API App Service** → **Security → Identity**.
 2. Under **System assigned**, toggle **Status** to **On** and click **Save**.
-3. Note the **API App Service Name** that appears — you'll need it for the SQL step.
+3. Note the **API App Service Name** — you'll need it for the SQL step.
 
 #### Grant the Managed Identity access to the database
 
-Connect to your Azure SQL database with SSMS as the admin and run:
+> **Important**: You must complete these two prerequisites before running the SQL below, or the `FROM EXTERNAL PROVIDER` command will fail:
+> 1. Your SQL Server must have a **Microsoft Entra admin set** (configured in step 3 above)
+> 2. You must connect to the database in SSMS **using your Entra account** (not SQL username/password) — go to **Options → Authentication → Azure Active Directory - Universal with MFA** and sign in with the same account you set as Entra admin
 
+Once connected with your Entra account, run:
 ```sql
--- Create a user mapped to the App Service's Managed Identity
 -- Replace 'ward-program-api' with your actual App Service name
 CREATE USER [ward-program-api] FROM EXTERNAL PROVIDER;
 ALTER ROLE [ward_programs_role] ADD MEMBER [ward-program-api];
 ```
 
-> The user name must exactly match your App Service name as it appears in Azure.
+> The user name must exactly match your App Service name as it appears in Azure. If SSMS gives an error about the provider, verify you are connected via Entra authentication and that the Entra admin is set on the SQL Server.
 
 #### How the connection works
 
