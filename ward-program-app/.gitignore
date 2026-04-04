@@ -1,0 +1,23 @@
+#ward program app .gitignore
+# ── Dependencies ──────────────────────────────────────────────────────────
+node_modules/
+
+# ── Build output — Azure Oryx builds this on deploy, don't commit it ──────
+dist/
+build/
+
+# ── Local env ─────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── OS / IDE ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Dev artifacts ─────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+*.txt

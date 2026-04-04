@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+/* ── Light mode base — off-white page background ─────────────────────────── */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f8f7f4;  /* warm off-white — not stark white, not gray */
+  color: #1e293b;             /* slate-800 — softer than pure black */
+}
+/* ── Dark mode base — page background and default text ───────────────────── */
+html.dark body {
+  background-color: #0f172a; /* slate-900 */
+  color: #f1f5f9;            /* slate-100 */
+}
+
+/* ── Draggable ────────────────────────────────────────────────────────────── */
+.draggable {
+  cursor: move;
+  transition: opacity 0.2s;
+}
+.draggable:hover {
+  opacity: 0.8;
+}
+
+/* ── PRINT STYLES (unchanged — always light) ─────────────────────────────── */
+@media print {
+  @page {
+    size: letter landscape;
+    margin: 0;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+    margin: 0;
+    padding: 0;
+  }
+  * {
+    page-break-inside: avoid !important;
+  }
+  /* PAGE CONTAINERS */
+  .print-page-1,
+  .print-page-2 {
+    position: relative;
+    width: 100%;
+    height: 7.8in;
+    max-height: 7.8in;
+    overflow: hidden;
+  }
+  .print-page-1 {
+    page-break-after: always;
+  }
+  .print-page-2 {
+    page-break-before: always;
+    page-break-after: avoid;
+  }
+  /* LEFT HALF */
+  .print-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(50% - 1px);
+    height: 100%;
+    box-sizing: border-box;
+    padding: 15px 10px 15px 25px;
+    overflow: hidden;
+    text-align: left;
+  }
+  /* CENTER LINE */
+  .print-left::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #333;
+  }
+  /* RIGHT HALF */
+  .print-right {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 15px 25px 15px 10px;
+    overflow: hidden;
+    text-align: left;
+  }
+  /* COVER */
+  .print-cover {
+    text-align: center;
+    padding-top: 8%;
+  }
+  .print-cover img {
+    max-width: 85%;
+    max-height: 3.2in;
+    object-fit: contain;
+    margin: 0 auto 0.5rem;
+    display: block;
+  }
+  /* TEXT STYLES */
+  .print-body {
+    font-size: 8pt;
+    line-height: 1.25;
+  }
+  .print-body * {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+  .print-title {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-bottom: 0.4rem;
+  }
+  .print-heading {
+    font-size: 10pt;
+    font-weight: bold;
+    margin-top: 0.3rem;
+    margin-bottom: 0.2rem;
+  }
+  /* TABLES */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 7pt;
+    table-layout: fixed;
+  }
+  table td,
+  table th {
+    padding: 0.15rem;
+    text-align: left;
+    word-wrap: break-word;
+  }
+  a {
+    text-decoration: none;
+    color: black;
+  }
+  .shadow, .shadow-lg, .shadow-md {
+    box-shadow: none !important;
+  }
+  .bg-gray-50, .bg-gray-100 {
+    background: white !important;
+  }
+}
+
+/* ── COMPONENT CLASSES ────────────────────────────────────────────────────── */
+
+/* ── Page wrapper — responsive max-width ─────────────────────────────────── */
+.page-container {
+  @apply w-full mx-auto px-4 py-8;
+  @apply max-w-full;           /* mobile — full width */
+  @apply sm:max-w-2xl;         /* ≥640px  — 672px  */
+  @apply md:max-w-4xl;         /* ≥768px  — 896px  */
+  @apply lg:max-w-6xl;         /* ≥1024px — 1152px */
+  @apply xl:max-w-7xl;         /* ≥1280px — 1280px */
+  @apply 2xl:max-w-screen-2xl; /* ≥1536px — 1536px */
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-primary {
+  @apply bg-lds-blue text-white px-6 py-3 rounded-lg hover:bg-opacity-90 font-semibold transition;
+  @apply dark:bg-blue-600 dark:hover:bg-blue-500;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 font-semibold transition;
+  @apply dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-semibold transition;
+}
+
+.btn-warning {
+  @apply bg-amber-600 text-white font-semibold rounded-lg transition;
+  @apply hover:bg-amber-700;
+  @apply dark:bg-amber-600 dark:hover:bg-amber-500;
+}
+
+.btn-info {
+  @apply bg-blue-500 text-white font-semibold rounded-lg transition;
+  @apply hover:bg-blue-600;
+  @apply dark:bg-blue-600 dark:hover:bg-blue-700;
+}
+
+.btn-purple {
+  @apply bg-purple-500 text-white font-semibold rounded-lg transition;
+  @apply hover:bg-purple-600;
+  @apply dark:bg-purple-600 dark:hover:bg-purple-700;
+}
+
+.btn-small {
+  @apply px-3 py-1 text-sm;
+}
+
+.btn-add-block {
+  @apply flex items-center gap-1 bg-white border-2 border-blue-300 hover:border-lds-blue hover:bg-blue-50 text-blue-800 font-semibold px-3 py-1.5 rounded-lg text-sm transition;
+  @apply dark:bg-slate-700 dark:border-slate-500 dark:hover:border-blue-400 dark:hover:bg-slate-600 dark:text-blue-300;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+  @apply dark:bg-slate-800 dark:shadow-slate-700/50;
+}
+
+/*
+ * card-stat — colored left-border stat card used on AdminDashboard + UserManager.
+ * Usage: <div class="card-stat border-green-500"> ... </div>
+ * The border-{color} class is added per-instance to set the accent color.
+ */
+.card-stat {
+  @apply bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-700/50;
+  @apply p-4 text-center border-l-4;
+}
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+.input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lds-blue focus:border-transparent;
+  @apply dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-400;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+  @apply dark:text-slate-300;
+}
+
+/* ── Modals ──────────────────────────────────────────────────────────────── */
+/*
+ * modal-backdrop — standardized overlay for all modals.
+ * Usage: <div class="modal-backdrop"> <div class="modal-container max-w-md"> ... </div> </div>
+ */
+.modal-backdrop {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  @apply bg-black/60 backdrop-blur-sm;
+}
+
+/*
+ * modal-container — standardized modal box.
+ * Add max-w-{size} per modal to control width (max-w-sm, max-w-md, max-w-lg, max-w-xl).
+ */
+.modal-container {
+  @apply bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full p-6;
+}
+
+/*
+ * modal-action-btn — bordered card-style choice button used in multi-option
+ * modals (publish conflict, unpublish, republish, etc.).
+ * Usage: <button class="modal-action-btn border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30">
+ */
+.modal-action-btn {
+  @apply w-full text-left px-4 py-3 rounded-lg border-2 transition;
+}

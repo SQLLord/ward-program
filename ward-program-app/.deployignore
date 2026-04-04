@@ -1,0 +1,17 @@
+# ── Secrets — NEVER deploy ────────────────────────────────────────────────
+.env
+.env.*
+
+# ── Dev dependencies — Azure runs npm install automatically ───────────────
+node_modules/
+.vscode/
+.idea/
+
+# ── OS artifacts ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Dev artifacts ─────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+*.txt
