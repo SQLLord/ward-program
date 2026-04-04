@@ -4,7 +4,7 @@ const { EmailClient } = require('@azure/communication-email');
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 const CONNECTION_STRING = process.env.ACS_CONNECTION_STRING;
-const SENDER_ADDRESS = process.env.ACS_SENDER_ADDRESS ?? 'donotreply@odessaward.org';
+const SENDER_ADDRESS = process.env.ACS_SENDER_ADDRESS ?? 'donotreply@example.com';
 
 const logDevEmail = (to, subject, html) => {
     console.log('\n============================');
