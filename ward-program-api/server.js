@@ -43,23 +43,27 @@ if (process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
+// ── CORS origins — defined early so helmet CSP can reuse them ────────────────
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+  : [];
+
+if (ALLOWED_ORIGINS.length === 0 && process.env.NODE_ENV === 'production') {
+  console.warn('[Server] ⚠️  ALLOWED_ORIGINS is not set — all cross-origin requests will be blocked.');
+}
+
 // ── Fix 14: Security Headers with Content Security Policy ────────────────────
+const cspConnectSrc = ["'self'", ...ALLOWED_ORIGINS];
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: {
     directives: {
       defaultSrc:  ["'self'"],
       scriptSrc:   ["'self'"],
-      styleSrc:    ["'self'", "'unsafe-inline'"],  // Tailwind requires this
+      styleSrc:    ["'self'", "'unsafe-inline'"],
       imgSrc:      ["'self'", "data:", "https:"],
-      connectSrc:  [
-        "'self'",
-        'https://odessa-ward-api.azurewebsites.net',
-        'https://odessa-ward-web.azurewebsites.net',
-        'https://api.odessaward.org',       // ← ADD
-        'https://www.odessaward.org',       // ← ADD
-        'https://odessaward.org',           // ← ADD
-      ],
+      connectSrc:  cspConnectSrc,
       fontSrc:     ["'self'"],
       objectSrc:   ["'none'"],
       frameSrc:    ["'none'"],
@@ -120,15 +124,6 @@ app.use((req, res, next) => {
 });
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-const ALLOWED_ORIGINS = [
-  'https://odessa-ward-web.azurewebsites.net',
-  'https://odessa-ward-api.azurewebsites.net',
-  'https://odessa-ward-api.scm.azurewebsites.net',
-  'https://api.odessaward.org',
-  ...(process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : []),
-];
 
 app.use(cors({
   origin: function (origin, callback) {
