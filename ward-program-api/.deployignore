@@ -1,0 +1,30 @@
+# ── Secrets — NEVER deploy ────────────────────────────────────────────────────
+.env
+.env.*
+.env.example
+
+# ── Dev dependencies — Azure runs npm install automatically ───────────────────
+node_modules/
+
+# ── Lock file — keep package-lock.json (remove the broken .package-lock.json)
+# package-lock.json should be DEPLOYED for deterministic installs
+
+# ── VS Code / IDE settings ────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Git metadata ──────────────────────────────────────────────────────────────
+.git/
+.gitignore
+
+# ── Dev artifacts ─────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+nodemon.json
+
+# ── Docs / markdown ───────────────────────────────────────────────────────────
+*.md
+
+# ── Root level junk ───────────────────────────────────────────────────────────
+*.txt
+.deployignore
