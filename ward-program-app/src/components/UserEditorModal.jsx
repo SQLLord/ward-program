@@ -149,7 +149,7 @@ export function UserEditorModal({ isOpen, onClose, editUser = null }) {
                 value={form.email}
                 onChange={(e) => set('email', e.target.value)}
                 className="input w-full"
-                placeholder="e.g. john@odessaward.org"
+                placeholder="e.g. john@ward.org"
               />
               <InlineError message={errors.email} />
             </div>
