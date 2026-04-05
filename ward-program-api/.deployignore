@@ -1,3 +1,4 @@
+//api .deployignore
 # ── Secrets — NEVER deploy ────────────────────────────────────────────────────
 .env
 .env.*

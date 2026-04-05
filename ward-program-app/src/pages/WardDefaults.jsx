@@ -46,6 +46,7 @@ export default function WardDefaults() {
       hasViewPassword: false,
       announcementEmails: '',       // ← ADD
       announcementEnabled: true,    // ← ADD
+      contactEmails: '', 
   });
 
   const [viewPassword, setViewPassword] = useState('');
@@ -77,6 +78,7 @@ export default function WardDefaults() {
             announcementEmails:  settingsData.announcementEmails ?? '',   // ← ADD
             announcementEnabled: settingsData.announcementEnabled !== false, // ← ADD
             wardUrl:             settingsData.wardUrl ?? '', // ← ADD
+            contactEmails:       settingsData.contactEmails ?? '',  // ← ADD
         });
 
       } catch (err) {
@@ -171,6 +173,7 @@ export default function WardDefaults() {
             viewPassword:        trimmedPwd || undefined,
             announcementEmails:  settings.announcementEmails ?? '',   // ← ADD
             announcementEnabled: settings.announcementEnabled,         // ← ADD
+            contactEmails:       settings.contactEmails ?? '',   // ← ADD
         });
 
       if (result.passwordChanged) {
@@ -587,8 +590,37 @@ export default function WardDefaults() {
                           All addresses will receive a copy of each announcement request.
                       </p>
                   </div>
-                </div>
                 
+                  {/* ── Contact Us ─────────────────────────────────────────────────────── */}
+                  <div className="border border-gray-200 dark:border-slate-600 rounded-xl p-4 bg-gray-50 dark:bg-slate-700">
+                      <h5 className="font-semibold text-sm mb-1 dark:text-slate-100">
+                          ✉️ Contact Us
+                      </h5>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">
+                          Allow ward members to send a message from the public program page.
+                          Leave blank to hide the Contact Us button entirely.
+                      </p>
+                      <label className="label text-sm">
+                          📧 Recipient Email Addresses
+                          <span className="text-gray-400 dark:text-slate-500 font-normal ml-1">
+                              (comma-separated)
+                          </span>
+                      </label>
+                      <textarea
+                          value={settings.contactEmails ?? ''}
+                          onChange={e => {
+                              setSettings(s => ({ ...s, contactEmails: e.target.value }));
+                              setDirtySettings(true);
+                          }}
+                          placeholder="e.g. bishop@example.com, clerk@example.com"
+                          rows={3}
+                          className="input w-full mt-1 text-sm font-mono resize-none"
+                      />
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                          The Contact Us button only appears on the public page when at least one address is configured here.
+                      </p>
+                  </div>
+                </div>
               )}
             </>
           )}

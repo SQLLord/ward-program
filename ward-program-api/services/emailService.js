@@ -155,4 +155,91 @@ const sendAnnouncementRequest = async ({
     return { messageId: result.id };
 };
 
-module.exports = { sendAnnouncementRequest };
+
+/**
+ * Sends a contact request email to all configured recipients.
+ * @param {Object}   opts
+ * @param {string}   opts.name
+ * @param {string}   [opts.email]
+ * @param {string}   [opts.phone]
+ * @param {string}   opts.message
+ * @param {string}   [opts.wardName]
+ * @param {string[]} opts.toEmails
+ */
+const sendContactRequest = async ({
+    name,
+    email,
+    phone,
+    message,
+    wardName,
+    toEmails,
+}) => {
+    if (!toEmails?.length) throw new Error('No recipient email addresses configured.');
+
+    const displayName = wardName?.trim() || 'Ward Programs';
+    const subject = `✉️ Contact Request from ${name}`;
+
+    const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background:#1a56db;padding:20px 24px;border-radius:8px 8px 0 0;">
+                <h2 style="color:white;margin:0;font-size:20px;">✉️ New Contact Request</h2>
+                <p style="color:#bfdbfe;margin:4px 0 0;font-size:14px;">${displayName}</p>
+            </div>
+            <div style="background:#f8f9fa;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td style="padding:8px 0;font-weight:bold;color:#374151;width:140px;">Name:</td>
+                        <td style="padding:8px 0;color:#111827;">${name}</td>
+                    </tr>
+                    ${email ? `
+                    <tr style="background:#fff;">
+                        <td style="padding:8px;font-weight:bold;color:#374151;">Email:</td>
+                        <td style="padding:8px;color:#111827;">
+                            <a href="mailto:${email}" style="color:#1a56db;">${email}</a>
+                        </td>
+                    </tr>` : ''}
+                    ${phone ? `
+                    <tr>
+                        <td style="padding:8px 0;font-weight:bold;color:#374151;">Phone:</td>
+                        <td style="padding:8px 0;color:#111827;">
+                            <a href="tel:${phone}" style="color:#1a56db;">${phone}</a>
+                        </td>
+                    </tr>` : ''}
+                    <tr style="background:#fff;">
+                        <td style="padding:8px;font-weight:bold;color:#374151;vertical-align:top;">Message:</td>
+                        <td style="padding:8px;color:#111827;">${message.replace(/\n/g, '<br>')}</td>
+                    </tr>
+                </table>
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
+                <p style="color:#6b7280;font-size:12px;margin:0;">
+                    This message was submitted via the ${displayName} website.
+                </p>
+            </div>
+        </div>`;
+
+    if (!CONNECTION_STRING) {
+        if (IS_PROD) throw new Error('ACS_CONNECTION_STRING is not configured.');
+        toEmails.forEach(to => logDevEmail(to, subject, html));
+        return { devMode: true };
+    }
+
+    const client = new EmailClient(CONNECTION_STRING);
+    const message_payload = {
+        senderAddress: SENDER_ADDRESS,
+        content: { subject, html },
+        recipients: {
+            to: toEmails.map(address => ({ address })),
+        },
+    };
+
+    const poller = await client.beginSend(message_payload);
+    const result = await poller.pollUntilDone();
+
+    if (result.status === 'Failed') {
+        throw new Error(`ACS email send failed: ${result.error?.message ?? 'Unknown error'}`);
+    }
+
+    return { messageId: result.id };
+};
+
+module.exports = { sendAnnouncementRequest, sendContactRequest };

@@ -16,6 +16,7 @@ const mapWardSettings = (row) => ({
     hasViewPassword:     !!row.has_view_password,
     announcementEmails:  row.announcement_emails ?? '',
     announcementEnabled: row.announcement_enabled !== false && row.announcement_enabled !== 0,
+    contactEmails:       row.contact_emails ?? '',
     updatedAt:           row.updated_at ?? null,
     updatedBy:           row.updated_by ?? null,
     wardUrl:             row.ward_url ?? '',
@@ -41,7 +42,7 @@ router.get('/settings', verifyToken, requireRole('bishopric', 'editor'), async (
 router.put('/settings', verifyToken, requireRole('bishopric', 'editor'), async (req, res) => {
   try {
       const { wardName, stakeName, viewPassword,
-              announcementEmails, announcementEnabled, wardUrl } = req.body; 
+              announcementEmails, announcementEnabled, wardUrl, contactEmails } = req.body; 
 
     if (!wardName?.trim()) {
       return res.status(400).json({ error: 'Ward name is required.' });
@@ -82,6 +83,7 @@ router.put('/settings', verifyToken, requireRole('bishopric', 'editor'), async (
       .input('announcement_emails',  sql.NVarChar(2000), announcementEmails?.trim() ?? null)
       .input('announcement_enabled', sql.Bit,            announcementEnabled !== false ? 1 : 0)
       .input('ward_url',             sql.NVarChar(500), wardUrl?.trim() ?? null)
+      .input('contact_emails',       sql.NVarChar(2000), contactEmails?.trim() ?? null)
       .execute('dbo.usp_SaveWardSettings');
 
     

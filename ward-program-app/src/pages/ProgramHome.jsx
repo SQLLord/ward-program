@@ -12,6 +12,7 @@ import ChildrensHymnLink from '../components/ChildrensHymnLink'; // ← ADD
 import AnnouncementRequestModal from '../components/AnnouncementRequestModal';
 import { api, apiBase } from '../utils/api';
 import { logger } from '../utils/logger';
+import ContactUsModal from '../components/ContactUsModal';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const getTodayString = () => {
@@ -202,7 +203,8 @@ function ProgramHome() {
   
   const [showAnnModal, setShowAnnModal]           = useState(false);
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
-
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactEnabled, setContactEnabled]     = useState(false);
   
   useEffect(() => {
       api.get('/announcements/settings')
@@ -210,6 +212,11 @@ function ProgramHome() {
           .catch(() => {}); // silent fail — button just won't show
   }, []);
 
+  useEffect(() => {
+      api.get('/contact/settings')
+          .then(d => setContactEnabled(!!d.contactEnabled))
+          .catch(() => {});
+  }, []);
 
 
   const [selectedDate, setSelectedDate] = useState(getTodayString());
@@ -412,10 +419,21 @@ function ProgramHome() {
                   📢 Submit Announcement Request
               </button>
           )}
-        </div>
-      
+        
 
-      
+          {contactEnabled && (
+            <button
+                onClick={() => setShowContactModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                          bg-lds-blue dark:bg-blue-600 text-white font-semibold
+                          text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
+                          active:scale-95 transition-all"
+            >
+                ✉️ Contact Us
+            </button>
+          )}
+
+      </div>
       {/* LOADING STATE */}
       {loadingDay && (
         <div className="card text-center py-12">
@@ -943,7 +961,13 @@ function ProgramHome() {
       {showAnnModal && (
           <AnnouncementRequestModal onClose={() => setShowAnnModal(false)} />
       )}
-
+      {/* CONTACT US MODAL */}
+      {showContactModal && (
+          <ContactUsModal
+              onClose={() => setShowContactModal(false)}
+              wardName={wardName}
+          />
+      )}
       {/* DISCLAIMER FOOTER */}
       {/* ✅ text-sm for better readability */}
       <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700 text-center">

@@ -14,6 +14,7 @@ const proxyRouter   = require('./routes/proxy');
 const imageRouter = require('./routes/images');
 const { doubleCsrf } = require('csrf-csrf');
 const announcementsRouter = require('./routes/announcements')
+const contactRouter = require('./routes/contact');
 
 const app  = express();
 app.set('trust proxy', 1);
@@ -170,7 +171,7 @@ app.get('/api/auth/csrf-token', (req, res) => {
 });
 
 // ── Apply CSRF protection to all mutating routes ────────────────────────────
-const EXEMPT = ['/api/auth/login', '/api/auth/ward-unlock', '/api/announcements/request', ];
+const EXEMPT = ['/api/auth/login', '/api/auth/ward-unlock', '/api/announcements/request', '/api/contact/request',];
 
 
 app.use((req, res, next) => {
@@ -215,6 +216,7 @@ app.use('/api/ward',     wardRoutes);
 app.use('/api/proxy',    proxyRouter);
 app.use('/api/images',  imageRouter);
 app.use('/api/announcements', announcementsRouter);
+app.use('/api/contact', contactRouter);
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
