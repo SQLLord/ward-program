@@ -14,6 +14,7 @@ import { PrintSettingsFlyout } from '../components/PrintSettingsFlyout';
 function ProgramBuilder() {
   const { id } = useParams();
   const [isNewProgram, setIsNewProgram] = useState(id === 'new');
+  
   const {
     formData, setFormData, step, setStep,
     imageUrlLoading, setImageUrlLoading, lastFetchedUrlRef,
@@ -58,6 +59,8 @@ function ProgramBuilder() {
     }
   };
 
+
+  
   // ── Step change — gate forward navigation on overflow ───────────────────
   const handleStepChange = (newStep) => {
     // Always allow backward navigation

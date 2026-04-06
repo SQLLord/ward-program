@@ -6,6 +6,7 @@ import { useError } from '../context/ErrorContext';
 import StatusBadge from '../components/StatusBadge';
 import { logger } from '../utils/logger';
 
+
 function AdminDashboard() {
   const navigate      = useNavigate();
   const { showToast } = useError();
@@ -22,11 +23,12 @@ function AdminDashboard() {
   const [publishModal, setPublishModal]     = useState(null);
   const [unpublishModal, setUnpublishModal] = useState(null);
   const [archiveConfirm, setArchiveConfirm] = useState(null);
-
   const DASHBOARD_PAGE_SIZE = 20;
   const [page, setPage]           = useState(1);
   const [hasMore, setHasMore]     = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+
+
 
   const filteredPrograms = programs.filter(p =>
     filter === 'all' ? true : p.status === filter
@@ -525,6 +527,8 @@ function AdminDashboard() {
         </p>
       )}
 
+
+      
     </div>
   );
 }

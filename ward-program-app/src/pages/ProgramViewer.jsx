@@ -9,11 +9,12 @@ import { useError } from '../context/ErrorContext';
 import ChildrensHymnLink from '../components/ChildrensHymnLink'; // ← ADD
 import { logger } from '../utils/logger';
 import { buildDateTimeLabel, buildMapsLink, } from '../utils/formatters';
+import WardDisclaimer from '../components/WardDisclaimer';
 
 
 function ProgramViewer() {
   const { id }                  = useParams();
-  const { loadWardDefaults }    = useProgramContext();
+  const { loadWardDefaults, loadWardName } = useProgramContext();
   const { showToast } = useError();
   const [program, setProgram]   = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -22,7 +23,9 @@ function ProgramViewer() {
   const [showPrintTip, setShowPrintTip]   = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const PRINT_TIP_KEY = 'printTipDismissed_v1';
-  
+  const [wardName, setWardName] = useState('');
+  const [stakeName, setStakeName] = useState('');
+
 
   useEffect(() => {
     
@@ -52,6 +55,16 @@ function ProgramViewer() {
       setWardDefaults(d ?? { leadership: [], schedules: [] })
     );
  }, [loadWardDefaults]);
+
+
+  useEffect(() => {
+      loadWardName().then(({ wardName, stakeName }) => {
+          setWardName(wardName);
+          setStakeName(stakeName);
+      });
+  }, [loadWardName]);
+
+
 
   // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
@@ -480,7 +493,7 @@ function ProgramViewer() {
           </div>
         </div>
       )}
-
+      <WardDisclaimer wardName={wardName} stakeName={stakeName} />
     </div>
   );
 }

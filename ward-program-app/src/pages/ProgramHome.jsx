@@ -14,6 +14,7 @@ import { api, apiBase } from '../utils/api';
 import { logger } from '../utils/logger';
 import ContactUsModal from '../components/ContactUsModal';
 import { buildDateTimeLabel, buildMapsLink, buildGoogleCalendarLink, downloadIcs } from '../utils/formatters';
+import WardDisclaimer from '../components/WardDisclaimer';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const getTodayString = () => {
@@ -269,46 +270,7 @@ function ProgramHome() {
           }
         </p>
       </div>
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
-          {wardUrl && (
-            <a
-              href={wardUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
-                         bg-lds-blue dark:bg-blue-600 text-white font-semibold
-                         text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
-             active:scale-95 transition-all"
-            >
-              🌐 Visit Ward Website
-            </a>
-          )}  
-          {announcementEnabled && (
-            <button
-                  onClick={() => setShowAnnModal(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
-                            bg-lds-blue dark:bg-blue-600 text-white font-semibold
-                            text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
-                            active:scale-95 transition-all"
-              >
-                  📢 Submit Announcement Request
-              </button>
-          )}
-        
-
-          {contactEnabled && (
-            <button
-                onClick={() => setShowContactModal(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
-                          bg-lds-blue dark:bg-blue-600 text-white font-semibold
-                          text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
-                          active:scale-95 transition-all"
-            >
-                ✉️ Contact Us
-            </button>
-          )}
-
-      </div>
+      
       {/* LOADING STATE */}
       {loadingDay && (
         <div className="card text-center py-12">
@@ -857,28 +819,49 @@ function ProgramHome() {
               wardName={wardName}
           />
       )}
-      {/* DISCLAIMER FOOTER */}
-      {/* ✅ text-sm for better readability */}
-      <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700 text-center">
-        <p className="text-sm text-gray-400 dark:text-slate-500 leading-relaxed">
-          This website is not an official{' '}
-          <a
-            href="https://www.churchofjesuschrist.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-gray-500 dark:hover:text-slate-400 transition"
-          >
-            Church of Jesus Christ of Latter-day Saints
-          </a>{' '}
-          website. It is an independent tool created to assist the{' '}
-          <strong className="text-gray-500 dark:text-slate-400">{wardName}</strong>
-          {stakeName && (
-            <>, <strong className="text-gray-500 dark:text-slate-400">{stakeName}</strong></>
-          )}{' '}
-          with sacrament meeting programs and is not sponsored, endorsed, or
-          officially affiliated with the Church.
-        </p>
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-3">
+          {wardUrl && (
+            <a
+              href={wardUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                         bg-lds-blue dark:bg-blue-600 text-white font-semibold
+                         text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
+             active:scale-95 transition-all"
+            >
+              🌐 Visit Ward Website
+            </a>
+          )}  
+          {announcementEnabled && (
+            <button
+                  onClick={() => setShowAnnModal(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                            bg-lds-blue dark:bg-blue-600 text-white font-semibold
+                            text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
+                            active:scale-95 transition-all"
+              >
+                  📢 Submit Announcement Request
+              </button>
+          )}
+        
+
+          {contactEnabled && (
+            <button
+                onClick={() => setShowContactModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                          bg-lds-blue dark:bg-blue-600 text-white font-semibold
+                          text-sm shadow hover:bg-opacity-90 dark:hover:bg-blue-500
+                          active:scale-95 transition-all"
+            >
+                ✉️ Contact Us
+            </button>
+          )}
+
       </div>
+
+
+      <WardDisclaimer wardName={wardName} stakeName={stakeName} />
 
     </div>
     
