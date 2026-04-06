@@ -50,6 +50,7 @@ const ensureIds = (data) => {
   return ensured;
 };
 
+
 // ============================================================
 // HELPER: Fetch published programs for conflict detection
 // Always fetches fresh from the summary endpoint — never
@@ -90,6 +91,11 @@ export function useProgramForm(id) {
   const [pendingPublishAction, setPendingPublishAction] = useState(null);
   const [imageUrlLoading, setImageUrlLoading]         = useState(false);
   const lastFetchedUrlRef                             = useRef('');
+  const [importedRequestIds, setImportedRequestIds] = useState(new Set());
+
+  const recordImportedRequests = useCallback((ids) => {
+    setImportedRequestIds(prev => new Set([...prev, ...ids]));
+}, []);
 
   // Ward defaults + override modes
   const [wardDefaults, setWardDefaults]   = useState({ leadership: [], schedules: [] });
@@ -103,6 +109,7 @@ export function useProgramForm(id) {
     loadWardName().then(({ wardName, stakeName }) => {
       setWardName(wardName);
       setStakeName(stakeName);
+      
     });
   }, [loadWardName]);
 
@@ -132,6 +139,8 @@ export function useProgramForm(id) {
     if (!loaded.cover.layout || loaded.cover.layout.length === 0) {
       loaded.cover.layout = defaultCoverLayout();
     }
+
+    setImportedRequestIds(new Set());
 
     loaded.meetingOrder.conducting  = loaded.meetingOrder.conducting  ?? loaded.conducting  ?? '';
     loaded.meetingOrder.presiding   = loaded.meetingOrder.presiding   ?? loaded.presiding   ?? '';
@@ -374,14 +383,25 @@ export function useProgramForm(id) {
   // ANNOUNCEMENTS
   // ── addAnnouncement now accepts an optional pregenerated id.
   // ============================================================
-  const addAnnouncement = (preId) => {
-    setFormData(prev => ({
-      ...prev,
-      announcements: [
-        ...prev.announcements,
-        { id: preId ?? Date.now().toString(), title: '', description: '', date: '', time: '' },
-      ],
-    }));
+  const addAnnouncement = (preId, data = {}) => {
+      setFormData(prev => ({
+          ...prev,
+          announcements: [
+              ...prev.announcements,
+              {
+                  id:          preId ?? Date.now().toString(),
+                  title:       data.title       ?? '',
+                  description: data.description ?? '',
+                  isPublic:    data.isPublic    ?? true,
+                  isAllDay:    data.isAllDay    ?? false,
+                  date:        data.date        ?? '',
+                  endDate:     data.endDate     ?? '',
+                  time:        data.time        ?? '',
+                  endTime:     data.endTime     ?? '',
+                  location:    data.location    ?? '',
+              },
+          ],
+      }));
   };
 
   const removeAnnouncement = (annId) => {
@@ -469,6 +489,18 @@ export function useProgramForm(id) {
         await createProgram(updated);
       } else {
         await api.put(`/programs/${formData.id}`, updated);
+        if (importedRequestIds.size > 0) {
+          try {
+              await api.post('/announcements/requests/mark-added', {
+                  requestIds: [...importedRequestIds],
+                  programId: formData.id,
+              });
+              setImportedRequestIds(new Set()); // clear after marking
+          } catch (err) {
+              // Non-fatal — log but don't fail the save
+              console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
+          }
+        }
       }
       showToast('✅ Draft saved successfully!');
       setTimeout(() => navigate('/admin'), 1500);
@@ -501,6 +533,18 @@ export function useProgramForm(id) {
       try {
         const updated = { ...formData, status: 'published' };
         await api.put(`/programs/${formData.id}`, updated);
+        if (importedRequestIds.size > 0) {
+          try {
+              await api.post('/announcements/requests/mark-added', {
+                  requestIds: [...importedRequestIds],
+                  programId: formData.id,
+              });
+              setImportedRequestIds(new Set()); // clear after marking
+          } catch (err) {
+              // Non-fatal — log but don't fail the save
+              console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
+          }
+        }
         setRepublishModal(false);
         showToast('🚀 Program updated and republished!');
         setTimeout(() => navigate('/admin'), 1500);
@@ -515,6 +559,18 @@ export function useProgramForm(id) {
     try {
       const updated = { ...formData, status: 'draft' };
       await api.put(`/programs/${formData.id}`, updated);
+      if (importedRequestIds.size > 0) {
+        try {
+            await api.post('/announcements/requests/mark-added', {
+                requestIds: [...importedRequestIds],
+                programId: formData.id,
+            });
+            setImportedRequestIds(new Set()); // clear after marking
+        } catch (err) {
+            // Non-fatal — log but don't fail the save
+            console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
+        }
+      }
       await unpublishProgram(formData.id);
       setRepublishModal(false);
       showToast('💾 Saved as draft — program unpublished.');
@@ -546,6 +602,18 @@ export function useProgramForm(id) {
       } else {
         try {
           await api.put(`/programs/${formData.id}`, { ...formData, status: 'published' });
+          if (importedRequestIds.size > 0) {
+            try {
+                await api.post('/announcements/requests/mark-added', {
+                    requestIds: [...importedRequestIds],
+                    programId: formData.id,
+                });
+                setImportedRequestIds(new Set()); // clear after marking
+            } catch (err) {
+                // Non-fatal — log but don't fail the save
+                console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
+            }
+          }
           showToast('🚀 Program published successfully!');
           setTimeout(() => navigate('/admin'), 1500);
         } catch (err) {
@@ -597,6 +665,18 @@ export function useProgramForm(id) {
     setPublishConflictModal(null);
     try {
       await api.put(`/programs/${formData.id}`, { ...formData, status: 'published' });
+      if (importedRequestIds.size > 0) {
+        try {
+            await api.post('/announcements/requests/mark-added', {
+                requestIds: [...importedRequestIds],
+                programId: formData.id,
+            });
+            setImportedRequestIds(new Set()); // clear after marking
+        } catch (err) {
+            // Non-fatal — log but don't fail the save
+            console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
+        }
+      }
       showToast('🚀 Program published successfully!');
       setTimeout(() => navigate('/admin'), 1500);
     } catch (err) {
@@ -676,6 +756,6 @@ export function useProgramForm(id) {
     wardDefaults,
     leadershipMode, schedulesMode,
     resetConfirm, setResetConfirm,
-    wardName, stakeName,
+    wardName, stakeName, importedRequestIds, recordImportedRequests
   };
 }

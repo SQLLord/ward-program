@@ -164,6 +164,7 @@ function ImageLibrary() {
             Upload and manage cover images for sacrament meeting programs.
           </p>
         </div>
+        
        <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}

@@ -533,8 +533,12 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
               break;
             }
             case 'sacramentAdmin':
-              pdf.setFontSize(meetSizes.headingPt); pdf.setFont('helvetica', 'bold');
-              pdf.text('Blessing and Passing of the Sacrament', p2RightX + 0.1, yPosMeet);
+              pdf.setFontSize(meetSizes.headingPt);
+              pdf.setFont('helvetica', 'italic');
+              pdf.text('Blessing and Passing of the Sacrament',
+                p2RightX + (halfWidth - 0.3) / 2, yPosMeet,
+                { align: 'center', maxWidth: halfWidth - 0.4 });
+              pdf.setFont('helvetica', 'normal');
               yPosMeet += meetSizes.headingLineH + 0.08;
               break;
 
@@ -572,7 +576,16 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
               yPosMeet += meetSizes.bodyLineH + 0.1;
               break;
 
-            
+            case 'testimony':
+              pdf.setFontSize(meetSizes.headingPt);
+              pdf.setFont('helvetica', 'italic');
+              pdf.text('Bearing of Testimonies',
+                p2RightX + (halfWidth - 0.3) / 2, yPosMeet,
+                { align: 'center', maxWidth: halfWidth - 0.4 });
+              pdf.setFont('helvetica', 'normal');
+              yPosMeet += meetSizes.headingLineH + 0.08;
+              break;
+
             // ── ADD THIS CASE ──────────────────────────────────────────────────────────
             case 'childrensHymn':
               // Heading
@@ -614,9 +627,13 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
               break;
             }
             case 'announce':
-              pdf.setFont('helvetica', 'bold'); pdf.setFontSize(meetSizes.bodyPt + 1);
-              pdf.text('Announcements and Ward Business', p2RightX + 0.2, yPosMeet);
-              yPosMeet += meetSizes.bodyLineH + 0.2;
+              pdf.setFontSize(meetSizes.bodyPt + 1);
+              pdf.setFont('helvetica', 'italic');
+              pdf.text('Announcements and Ward Business',
+                p2RightX + (halfWidth - 0.3) / 2, yPosMeet,
+                { align: 'center', maxWidth: halfWidth - 0.4 });
+              pdf.setFont('helvetica', 'normal');
+              yPosMeet += meetSizes.bodyLineH + 0.20;
               break;
 
             case 'baptism':

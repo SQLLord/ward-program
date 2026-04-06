@@ -18,6 +18,7 @@ import { useDarkMode, DarkModeProvider } from './hooks/useDarkMode.jsx'; // ← 
 import ChangePassword from './pages/ChangePassword';
 import WardDefaults from './pages/WardDefaults';
 import ImageLibrary from './pages/ImageLibrary';
+import AnnouncementRequests from './pages/AnnouncementRequests';
 
 
 // ── NavBar ────────────────────────────────────────────────────────────────────
@@ -112,6 +113,10 @@ function NavBar() {
                       ⚙️ <span>Ward Defaults</span>
                     </Link>
                   )}
+                  <Link to="/announcement-requests" onClick={handleNavClick}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+                      📢 <span>Announcement Requests</span>
+                  </Link>
                 </div>
 
                 {/* ── Dark Mode Toggle ───────────────────────────────────── */}
@@ -200,6 +205,7 @@ function App() {
                     <Route path="/change-password" element={<ProtectedRoute roles={['bishopric', 'editor']}><ChangePassword /></ProtectedRoute>} />
                     <Route path="/ward-defaults" element={<ProtectedRoute roles={['bishopric']}><WardDefaults /></ProtectedRoute>} />
                     <Route path="/admin/image-library" element={<ProtectedRoute roles={['bishopric', 'editor']}><ImageLibrary /></ProtectedRoute>} />
+                    <Route path="/announcement-requests" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequests /></ProtectedRoute>} />
                   </Routes>
                 </Router>
               </ErrorProvider>

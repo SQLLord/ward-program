@@ -7,6 +7,8 @@ import { MeetingItemRow }   from './MeetingItemRow';
 import { PanelHealthBar } from './PanelHealthBar';
 import { generateId } from '../utils/generateId';
 import { AnnouncementRow } from './AnnouncementRow';
+import ImportAnnouncementsModal from './ImportAnnouncementsModal';
+import { api } from '../utils/api';
 
 
 export function StepEditorPanel({
@@ -22,17 +24,20 @@ export function StepEditorPanel({
   switchLeadershipToDefault,
   schedulesMode, switchSchedulesToCustom, switchSchedulesToDefault,
   resetConfirm, setResetConfirm, wardName,
-  programName, updateProgramName, health, isNewProgram, onFirstItemAdded 
+  programName, updateProgramName, health, isNewProgram, onFirstItemAdded, 
+  importedRequestIds, onImportRequests, 
 }) {
 
   // Add these right after the resetConfirmPortal declaration:
   const [newCoverBlockId,   setNewCoverBlockId]   = useState(null);
   const [newMeetingItemId,  setNewMeetingItemId]  = useState(null);
   const [newAnnouncementId, setNewAnnouncementId] = useState(null);
-  
+  const [pendingRequestCount, setPendingRequestCount] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
   const ITEM_LABELS = {
     childrensHymn: "Children's Song",
   };
+
 
 
   // Clear newItemId flags after they've been consumed (1 render cycle)
@@ -47,6 +52,14 @@ export function StepEditorPanel({
   useEffect(() => {
     if (newAnnouncementId) { const t = setTimeout(() => setNewAnnouncementId(null), 100); return () => clearTimeout(t); }
   }, [newAnnouncementId]);
+
+  useEffect(() => {
+    api.get('/announcements/requests?status=pending')
+        .then(data => setPendingRequestCount(
+            data.filter(r => !importedRequestIds?.has(r.id)).length
+        ))
+        .catch(() => {});
+}, []);
 
   // ── Reset Confirm Portal — renders at body level to escape sticky panels ──
   const resetConfirmPortal = resetConfirm
@@ -212,7 +225,7 @@ export function StepEditorPanel({
               <p className="w-full text-xs text-gray-500 dark:text-slate-400 mb-1">Add Items:</p>
               {
               ['openingHymn','openingPrayer','announce','sacramentHymn','sacramentAdmin',
-              'speaker','hymn','childrensHymn','musical','closingHymn','closingPrayer','baptism','confirmation','customText'
+              'speaker','hymn','childrensHymn','musical','testimony','closingHymn','closingPrayer','baptism','confirmation','customText'
 
               ].map(type => (
                 <button key={type} 
@@ -258,14 +271,24 @@ export function StepEditorPanel({
       {/* ── STEP 2: ANNOUNCEMENTS ──────────────────────────────────────────── */}
       {step === 2 && (
         <div>
-          <button onClick={() => {
-            const newId = generateId();
-            setNewAnnouncementId(newId);
-            addAnnouncement(newId);
-            onFirstItemAdded?.();
-          }} className="btn-primary btn-small mb-3">
-            + Add Announcement
-          </button>
+          <div className="flex gap-2 mb-3">
+              <button onClick={() => {
+                  const newId = generateId();
+                  setNewAnnouncementId(newId);
+                  addAnnouncement(newId);
+                  onFirstItemAdded?.();
+              }} className="btn-primary btn-small">
+                  + Add Announcement
+              </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="btn-secondary btn-small"
+              >
+                📥 Import Requests{pendingRequestCount !== null && pendingRequestCount > 0
+                    ? ` (${pendingRequestCount})`
+                    : pendingRequestCount === 0 ? ' (0)' : ''}
+            </button>
+          </div>
           <DraggableList
             items={formData.announcements}
             onReorder={(reordered) => setFormData({ ...formData, announcements: reordered })}
@@ -280,6 +303,18 @@ export function StepEditorPanel({
               />
             )}
           />
+
+          {showImportModal && (
+            <ImportAnnouncementsModal
+              onClose={() => setShowImportModal(false)}
+              alreadyImported={importedRequestIds}
+              onImport={(announcements, requestIds) => {
+                announcements.forEach(ann => addAnnouncement(null, ann));
+                onImportRequests(requestIds);
+                onFirstItemAdded?.();
+              }}
+            />
+          )}
         </div>
       )}
 

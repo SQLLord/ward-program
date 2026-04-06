@@ -218,6 +218,12 @@ export function StepPreviewPanel({
                             <span className="block ml-2">{item.name ?? '(Name)'}</span>
                           </span>
                         )}
+
+                        {item.type === 'testimony' && (
+                          <span className="italic text-center block text-gray-500 dark:text-slate-400">
+                            Bearing of Testimonies
+                          </span>
+                        )}
                         
                         {item.type === 'sacramentHymn' && (
                           <span>
@@ -226,7 +232,9 @@ export function StepPreviewPanel({
                           </span>
                         )}
                         {item.type === 'sacramentAdmin' && (
-                          <span className="font-bold">Blessing and Passing of the Sacrament</span>
+                          <span className="italic text-center block text-gray-500 dark:text-slate-400">
+                            Blessing and Passing of the Sacrament
+                          </span>
                         )}
                         {item.type === 'speaker' && (
                           <span>
@@ -268,7 +276,9 @@ export function StepPreviewPanel({
                           </span>
                         )}
                         {item.type === 'announce' && (
-                          <span className="font-bold">Announcements and Ward Business</span>
+                          <span className="italic text-center block text-gray-500 dark:text-slate-400">
+                            Announcements and Ward Business
+                          </span>
                         )}
                         {item.type === 'baptism' && (
                           <span>

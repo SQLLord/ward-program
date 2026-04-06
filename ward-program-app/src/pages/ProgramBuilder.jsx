@@ -34,6 +34,8 @@ function ProgramBuilder() {
     switchLeadershipToCustom, switchLeadershipToDefault,
     switchSchedulesToCustom, switchSchedulesToDefault,
     wardName,
+    importedRequestIds,       // ← ADD
+    recordImportedRequests,   // ← ADD
   } = useProgramForm(id);
 
   const updateProgramName = (val) => updateField('programName', val);
@@ -241,6 +243,11 @@ function ProgramBuilder() {
           </span>
         )}
       </div>
+      {formData.id && (
+        <span className="text-xs text-gray-400 dark:text-slate-500">
+            🆔 ID: {formData.id}
+        </span>
+      )}
 
       {/* STEP TABS */}
       <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 mb-4">
@@ -345,6 +352,8 @@ function ProgramBuilder() {
             health={health}
             isNewProgram={isNewProgram}
             onFirstItemAdded={() => setIsNewProgram(false)}
+            importedRequestIds={importedRequestIds}
+            onImportRequests={recordImportedRequests}
           />
         </div>
 

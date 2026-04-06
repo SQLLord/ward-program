@@ -41,6 +41,8 @@ function getMeetingSummary(item) {
       return `🎤 Speaker${item.name ? ` — ${item.name}` : ''}${item.topic ? ` | ${item.topic}` : ''}`;
     case 'musical':
       return `🎼 Musical${item.performers ? ` — ${item.performers}` : ''}${item.piece ? ` | ${item.piece}` : ''}`;
+    case 'testimony':
+      return `🕊️ Bearing of Testimonies`;
     case 'baptism':
       return `💧 Baptism${item.personName ? ` — ${item.personName}` : ''}`;
     case 'confirmation':
@@ -55,12 +57,13 @@ function getMeetingSummary(item) {
 }
 
 // ── Static types — no editable fields, never need expanding ──────────────────
-const STATIC_TYPES = ['announce', 'sacramentAdmin'];
+const STATIC_TYPES = ['announce', 'sacramentAdmin', 'testimony'];
 
 
 export function MeetingItemRow({ item, updateMeetingItem, removeMeetingItem, isNew }) {
   const [expanded, setExpanded] = useState(isNew ?? false);
   const isStatic = STATIC_TYPES.includes(item.type);
+  const summary = getMeetingSummary(item);
   const deleteCls = 'btn-danger w-8 h-8 p-0 min-w-[2rem] flex items-center justify-center text-xs';
 
   return (
@@ -75,7 +78,11 @@ export function MeetingItemRow({ item, updateMeetingItem, removeMeetingItem, isN
           onClick={() => { if (!isStatic) setExpanded(e => !e); }}
         >
 
-        <span className="text-xs text-gray-600 dark:text-slate-300 truncate flex-1 min-w-0">
+        <span className={`text-xs truncate flex-1 min-w-0 ${
+          isStatic
+            ? 'italic text-gray-500 dark:text-slate-400'
+            : 'text-gray-600 dark:text-slate-300'
+        }`} title={summary}>
           {getMeetingSummary(item)}
         </span>
         <div className="flex items-center gap-1 shrink-0">
@@ -194,6 +201,11 @@ export function MeetingItemRow({ item, updateMeetingItem, removeMeetingItem, isN
               placeholder="Name"
               maxLength={150}
             />
+          )}
+
+          {/* TESTIMONY */}
+          {item.type === 'testimony' && (
+            <span className="font-bold">Bearing of Testimonies</span>
           )}
 
           {/* SPEAKER */}

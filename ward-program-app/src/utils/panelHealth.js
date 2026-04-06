@@ -247,6 +247,9 @@ const calcMeetingOrder = (formData) => {
         used += sizes.bodyLineH + 0.10;        // performers/piece
         break;
 
+      case 'testimony':
+        used += sizes.headingLineH + 0.08;
+        break;
 
       case 'baptism':
         used += sizes.bodyLineH + 0.05;

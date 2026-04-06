@@ -8,133 +8,7 @@ import { useProgramContext }      from '../context/ProgramContext';
 import { useError } from '../context/ErrorContext';
 import ChildrensHymnLink from '../components/ChildrensHymnLink'; // ← ADD
 import { logger } from '../utils/logger';
-
-function buildMapsLink(location) {
-  if (!location?.trim()) return null;
-  return `https://maps.google.com/maps?q=${encodeURIComponent(location.trim())}`;
-}
-
-// Format a date string for display
-function formatAnnDate(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-  });
-}
-
-// Format a time string for display
-function formatAnnTime(timeStr) {
-  if (!timeStr) return '';
-  return new Date(`2000-01-01T${timeStr}`).toLocaleTimeString('en-US', {
-    hour: 'numeric', minute: '2-digit', hour12: true,
-  });
-}
-
-// Build the date/time label accounting for all-day, multi-day, start+end times
-function buildDateTimeLabel(ann) {
-  const { date, endDate, time, endTime, isAllDay } = ann;
-  if (!date && !time) return null;
-
-  if (isAllDay) {
-    if (date && endDate && date !== endDate) {
-      return `📅 ${formatAnnDate(date)} – ${formatAnnDate(endDate)}`;
-    }
-    return date ? `📅 ${formatAnnDate(date)}` : null;
-  }
-
-  // Timed event
-  const dateLabel = date ? `📅 ${formatAnnDate(date)}` : '';
-  const endDateLabel = (endDate && endDate !== date) ? ` – ${formatAnnDate(endDate)}` : '';
-  const startTimeLabel = time ? ` · 🕐 ${formatAnnTime(time)}` : '';
-  const endTimeLabel = endTime ? ` – ${formatAnnTime(endTime)}` : '';
-
-  return `${dateLabel}${endDateLabel}${startTimeLabel}${endTimeLabel}` || null;
-}
-
-
-// ── Calendar helpers ──────────────────────────────────────────────────────────
-
-function buildGoogleCalendarLink({ title, date, endDate, time, endTime, location }) {
-  if (!date) return null;
-
-  let dates;
-  if (time) {
-    // Timed event
-    const start = new Date(`${date}T${time}`);
-    // End time: use endTime on endDate if provided, else +1 hour from start
-    const end = endTime
-      ? new Date(`${endDate || date}T${endTime}`)
-      : new Date(start.getTime() + 60 * 60 * 1000);
-    const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    dates = `${fmt(start)}/${fmt(end)}`;
-  } else {
-    // All-day event — Google uses YYYYMMDD/YYYYMMDD (end is exclusive)
-    const [y, m, d] = (endDate || date).split('-').map(Number);
-    const dayAfterEnd = new Date(y, m - 1, d + 1);
-    const pad = (n) => String(n).padStart(2, '0');
-    const endStr = `${dayAfterEnd.getFullYear()}${pad(dayAfterEnd.getMonth() + 1)}${pad(dayAfterEnd.getDate())}`;
-    dates = `${date.replace(/-/g, '')}/${endStr}`;
-  }
-
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text:   title || 'Ward Announcement',
-    dates,
-  });
-  if (location) params.set('location', location);
-
-  return `https://www.google.com/calendar/render?${params.toString()}`;
-}
-
-function downloadIcs({ title, date, endDate, time, endTime, location }) {
-  if (!date) return;
-
-  const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-  const safeTitle    = (title || 'Ward Announcement').replace(/[\\;,]/g, '\\$&');
-  const safeLocation = location ? location.replace(/[\\;,]/g, '\\$&') : '';
-
-  let dtStart, dtEnd;
-  if (time) {
-    const start = new Date(`${date}T${time}`);
-    const end   = endTime
-      ? new Date(`${endDate || date}T${endTime}`)
-      : new Date(start.getTime() + 60 * 60 * 1000);
-    const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    dtStart = `DTSTART:${fmt(start)}`;
-    dtEnd   = `DTEND:${fmt(end)}`;
-  } else {
-    // All-day
-    const [y, m, d] = (endDate || date).split('-').map(Number);
-    const dayAfterEnd = new Date(y, m - 1, d + 1);
-    const pad = (n) => String(n).padStart(2, '0');
-    const endStr = `${dayAfterEnd.getFullYear()}${pad(dayAfterEnd.getMonth() + 1)}${pad(dayAfterEnd.getDate())}`;
-    dtStart = `DTSTART;VALUE=DATE:${date.replace(/-/g, '')}`;
-    dtEnd   = `DTEND;VALUE=DATE:${endStr}`;
-  }
-
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//ProgramHome//EN',
-    'BEGIN:VEVENT',
-    `UID:${now}-${Math.random().toString(36).slice(2)}@programhome`,
-    `DTSTAMP:${now}`,
-    dtStart,
-    dtEnd,
-    `SUMMARY:${safeTitle}`,
-    safeLocation ? `LOCATION:${safeLocation}` : '',
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ].filter(Boolean).join('\r\n');
-
-  const blob = new Blob([lines], { type: 'text/calendar;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `${(title || 'event').replace(/\s+/g, '-').toLowerCase()}.ics`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+import { buildDateTimeLabel, buildMapsLink, } from '../utils/formatters';
 
 
 function ProgramViewer() {
@@ -433,14 +307,27 @@ function ProgramViewer() {
                   {item.name && <p className="ml-3 text-gray-600 dark:text-slate-400">{item.name}</p>}
                 </div>
               )}
-              {item.type === 'announce' && <p className="font-bold">Announcements and Ward Business</p>}
+              {item.type === 'announce' && (
+                <p className="text-sm italic text-center text-gray-500 dark:text-slate-400">
+                  Announcements and Ward Business
+                </p>
+              )}
+              {item.type === 'testimony' && (
+                <p className="text-sm italic text-center text-gray-500 dark:text-slate-400">
+                  Bearing of Testimonies
+                </p>
+              )}
               {item.type === 'sacramentHymn' && (
                 <div>
                   <p className="font-bold">Sacrament Hymn</p>
                   {(item.number || item.title) && <p className="ml-3 text-gray-600 dark:text-slate-400">Hymn {item.number ? `#${item.number}` : ''}{item.title ? `: ${item.title}` : ''}{item.number && item.title && <span className="ml-2"><HymnLink number={item.number} title={item.title} /></span>}</p>}
                 </div>
               )}
-              {item.type === 'sacramentAdmin' && <p className="font-bold">Blessing and Passing of the Sacrament</p>}
+              {item.type === 'sacramentAdmin' && (
+                <p className="text-sm italic text-center text-gray-500 dark:text-slate-400">
+                  Blessing and Passing of the Sacrament
+                </p>
+              )}
               {item.type === 'speaker' && (
                 <div>
                   <p className="font-bold">Speaker</p>
@@ -525,15 +412,19 @@ function ProgramViewer() {
               {/* Location — tappable maps link */}
               {ann.location && (
                 <p className="text-xs mt-1">
-                  <a
-                    href={buildMapsLink(ann.location)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400
-                               underline hover:text-blue-800 dark:hover:text-blue-300 transition"
-                  >
-                    📍 {ann.location}
-                  </a>
+                  {buildMapsLink(ann.location) ? (
+                    <a
+                      href={buildMapsLink(ann.location)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400
+                                underline hover:text-blue-800 dark:hover:text-blue-300 transition"
+                    >
+                      📍 {ann.location}
+                    </a>
+                  ) : (
+                    <span className="text-gray-600 dark:text-slate-300">📍 {ann.location}</span>
+                  )}
                 </p>
               )}
 

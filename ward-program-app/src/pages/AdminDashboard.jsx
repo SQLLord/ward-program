@@ -467,6 +467,9 @@ function AdminDashboard() {
                 <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                   ✏️ Last edited: {formatLastModified(program.lastModified)}
                 </p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">
+                  🆔 Program ID: {program.id}
+                </p>
                 <StatusBadge status={program.status} />
               </div>
 
