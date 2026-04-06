@@ -160,7 +160,7 @@ npm run dev
 
 ### 4. Database setup
 
-Run the SQL scripts in `ward-program-api/sql/` against your local SQL Server instance to create all tables, stored procedures, TVP types, and seed data.
+Run the SQL scripts in `dbscripts/` against your local SQL Server instance to create all tables, stored procedures, TVP types, and seed data.
 
 ---
 
@@ -235,17 +235,45 @@ The `.deployignore` file excludes `.env`, `node_modules/`, and other dev artifac
 
 ## First-Time Setup (After Deployment)
 
-1. **Create first admin user** — Use the SQL script to insert the first `bishopric` user with a bcrypt-hashed password
-2. **Log in** at `/login`
-3. **Set ward name and stake name** — Ward Defaults → Settings
-4. **Set member view password** — Ward Defaults → Settings → Member View Password
-5. **Add ward leadership** — Ward Defaults → Ward Leadership
-6. **Add meeting schedules** — Ward Defaults → Meeting Schedules
-7. **Configure announcement requests** — Ward Defaults → Settings → Announcement Requests (add recipient emails)
-8. **Configure Contact Us** — Ward Defaults → Settings → Contact Us (add recipient emails)
-9. **Upload cover images** — Image Library
-10. **Create your first program** — Program Dashboard → Create New Program
+### Creating the First Admin User
 
+You'll need to generate a bcrypt hash for the initial password, then insert the user directly into the database.
+
+**Step 1 — Generate a bcrypt hash**
+
+Run this in any Node.js environment (locally in the API folder works fine):
+```bash
+node -e "const bcrypt = require('bcrypt'); bcrypt.hash('YourPasswordHere', 12).then(h => console.log(h));"
+```
+
+Copy the output hash — it will look like `$2b$12$...`
+
+**Step 2 — Insert the user**
+
+Run this in SSMS against your database:
+```sql
+INSERT INTO dbo.users (name, email, password_hash, role, is_active)
+VALUES (
+    'Bishop Smith',
+    'bishop@example.com',
+    '$2b$12$YOUR_HASH_HERE',
+    'bishopric',
+    1
+);
+```
+
+**Step 3 — Log in and continue setup**
+
+3. Go to `/login` and sign in with the email and password you just set
+4. **Set ward name and stake name** — Ward Defaults → Settings
+5. **Set member view password** — Ward Defaults → Settings → Member View Password
+6. **Add ward leadership** — Ward Defaults → Ward Leadership
+7. **Add meeting schedules** — Ward Defaults → Meeting Schedules
+8. **Configure announcement requests** — Ward Defaults → Settings → Announcement Requests (add recipient emails)
+9. **Configure Contact Us** — Ward Defaults → Settings → Contact Us (add recipient emails)
+10. **Upload cover images** — Image Library
+11. **Create your first program** — Program Dashboard → Create New Program
+12. **Add additional users** — Manage Users (accessible from the nav menu)
 ---
 
 ## Key Design Decisions
