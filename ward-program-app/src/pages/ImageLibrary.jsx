@@ -2,9 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useError } from '../context/ErrorContext';
 import { apiBase, getCsrfToken } from '../utils/api';  // ← add getCsrfToken
+import { useNavigate } from 'react-router-dom';
 
 function ImageLibrary() {
   const { showToast } = useError();
+  const navigate = useNavigate();
   const [images, setImages]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [uploading, setUploading]   = useState(false);
@@ -165,17 +167,25 @@ function ImageLibrary() {
           </p>
         </div>
         
-       <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="btn-primary flex items-center gap-2"
-        >
-          {uploading
-            ? uploadProgress
-              ? `⏳ Uploading ${uploadProgress.done}/${uploadProgress.total}...`
-              : '⏳ Uploading...'
-            : '⬆️ Upload Images'}   {/* ← plural */}
-        </button>
+       <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/admin')}
+            className="btn-secondary"
+          >
+            ← Back to Dashboard
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="btn-primary flex items-center gap-2"
+          >
+            {uploading
+              ? uploadProgress
+                ? `⏳ Uploading ${uploadProgress.done}/${uploadProgress.total}...`
+                : '⏳ Uploading...'
+              : '⬆️ Upload Images'}
+          </button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
