@@ -169,9 +169,9 @@ Run the SQL scripts in `ward-program-api/sql/` against your local SQL Server ins
 ### Architecture
 
 ```
-odessaward.org (DNS)
-├── odessa-ward-web.azurewebsites.net   — Frontend (React/Vite build)
-└── odessa-ward-api.azurewebsites.net   — API (Node/Express)
+ward.org (DNS)
+├── ward-web.azurewebsites.net   — Frontend (React/Vite build)
+└── ward-api.azurewebsites.net   — API (Node/Express)
     ├── Azure SQL Database
     ├── Azure Blob Storage (images)
     └── Azure Communication Services (email)
@@ -185,8 +185,8 @@ The API uses Azure Managed Identity to connect to Azure SQL in production — no
 
 ```sql
 -- Grant access to the API's managed identity:
-CREATE USER [odessa-ward-api] FROM EXTERNAL PROVIDER;
-ALTER ROLE ward_programs_role ADD MEMBER [odessa-ward-api];
+CREATE USER [ward-api] FROM EXTERNAL PROVIDER;
+ALTER ROLE ward_programs_role ADD MEMBER [ward-api];
 ```
 
 ### Environment Variables (Azure App Service — API)
@@ -207,7 +207,7 @@ Set these in **Configuration → Application Settings**:
 
 Example `ALLOWED_ORIGINS`:
 ```
-https://odessaward.org,https://www.odessaward.org,https://api.odessaward.org,https://odessa-ward-web.azurewebsites.net,https://odessa-ward-api.azurewebsites.net
+https://ward.org,https://www.ward.org,https://api.ward.org,https://ward-web.azurewebsites.net,https://ward-api.azurewebsites.net
 ```
 
 ### Frontend Build & Deploy
@@ -222,7 +222,7 @@ Then deploy the `dist/` folder to the frontend App Service via VS Code Azure ext
 Create `.env.production` in `ward-program-app/` before building:
 
 ```env
-VITE_API_URL=https://api.odessaward.org/api
+VITE_API_URL=https://api.ward.org/api
 ```
 
 ### API Deploy
