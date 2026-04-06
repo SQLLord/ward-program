@@ -664,16 +664,19 @@ export function useProgramForm(id) {
   const handlePublishConflictBoth = async () => {
     setPublishConflictModal(null);
     try {
-      await api.put(`/programs/${formData.id}`, { ...formData, status: 'published' });
+      if (formData.id) {
+        await api.put(`/programs/${formData.id}`, { ...formData, status: 'published' });
+      } else {
+        await createProgram({ ...formData, status: 'published' });
+      }
       if (importedRequestIds.size > 0) {
         try {
             await api.post('/announcements/requests/mark-added', {
                 requestIds: [...importedRequestIds],
                 programId: formData.id,
             });
-            setImportedRequestIds(new Set()); // clear after marking
+            setImportedRequestIds(new Set());
         } catch (err) {
-            // Non-fatal — log but don't fail the save
             console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
         }
       }
