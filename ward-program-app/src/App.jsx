@@ -19,6 +19,8 @@ import ChangePassword from './pages/ChangePassword';
 import WardDefaults from './pages/WardDefaults';
 import ImageLibrary from './pages/ImageLibrary';
 import AnnouncementRequests from './pages/AnnouncementRequests';
+import AnnouncementRequestEdit from './pages/AnnouncementRequestEdit';
+
 
 
 // ── NavBar ────────────────────────────────────────────────────────────────────
@@ -206,6 +208,7 @@ function App() {
                     <Route path="/ward-defaults" element={<ProtectedRoute roles={['bishopric']}><WardDefaults /></ProtectedRoute>} />
                     <Route path="/admin/image-library" element={<ProtectedRoute roles={['bishopric', 'editor']}><ImageLibrary /></ProtectedRoute>} />
                     <Route path="/announcement-requests" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequests /></ProtectedRoute>} />
+                    <Route path="/announcement-requests/:id/edit" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequestEdit /></ProtectedRoute>} />
                   </Routes>
                 </Router>
               </ErrorProvider>

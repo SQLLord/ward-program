@@ -114,6 +114,40 @@ router.get('/settings', async (_req, res) => {
     }
 });
 
+// ── GET /api/announcements/requests/:id ──────────────────────────────────────
+router.get('/requests/:id', verifyToken, requireRole('bishopric', 'editor'), async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid request ID.' });
+
+        const r = await getPool().request()
+            .input('id', sql.Int, id)
+            .execute('dbo.usp_GetAnnouncementRequest');
+
+        const row = r.recordset[0];
+        if (!row) return res.status(404).json({ error: 'Announcement request not found.' });
+
+        return res.json({
+            id:             row.id,
+            submitterName:  row.submitter_name,
+            title:          row.title,
+            description:    row.description ?? '',
+            isAllDay:       !!row.is_all_day,
+            date:           row.event_date     ? row.event_date.toISOString().slice(0, 10)     : '',
+            endDate:        row.event_end_date ? row.event_end_date.toISOString().slice(0, 10) : '',
+            time:           row.event_time     ? String(row.event_time).slice(0, 5)            : '',
+            endTime:        row.event_end_time ? String(row.event_end_time).slice(0, 5)        : '',
+            location:       row.location ?? '',
+            status:         row.status,
+            submittedAt:    row.submitted_at,
+            addedToProgram: row.added_to_program ?? null,
+        });
+    } catch (err) {
+        console.error('[Announcements] GET /requests/:id error:', err);
+        return res.status(500).json({ error: 'Failed to fetch announcement request.' });
+    }
+});
+
 // ── GET /api/announcements/requests ──────────────────────────────────────────
 // Auth required — editor or bishopric
 router.get('/requests', verifyToken, requireRole('bishopric', 'editor'), async (req, res) => {
@@ -171,6 +205,65 @@ router.patch('/requests/:id/status', verifyToken, requireRole('bishopric', 'edit
         return res.status(500).json({ error: 'Failed to update request status.' });
     }
 });
+
+// Full field update — auth required, editor or bishopric
+router.patch('/requests/:id', verifyToken, requireRole('bishopric', 'editor'), async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid request ID.' });
+
+        const {
+            submitterName, title, description,
+            isAllDay, eventDate, eventEndDate,
+            eventTime, eventEndTime, location,
+        } = req.body;
+
+        if (!submitterName?.trim())
+            return res.status(400).json({ error: 'Submitter name is required.' });
+        if (!title?.trim())
+            return res.status(400).json({ error: 'Title is required.' });
+        if (submitterName.trim().length > 100)
+            return res.status(400).json({ error: 'Name must be 100 characters or fewer.' });
+        if (title.trim().length > 200)
+            return res.status(400).json({ error: 'Title must be 200 characters or fewer.' });
+        if (description && description.length > 2000)
+            return res.status(400).json({ error: 'Description must be 2000 characters or fewer.' });
+        if (eventDate && !/^\d{4}-\d{2}-\d{2}$/.test(eventDate))
+            return res.status(400).json({ error: 'Invalid date format.' });
+        if (eventEndDate && !/^\d{4}-\d{2}-\d{2}$/.test(eventEndDate))
+            return res.status(400).json({ error: 'Invalid end date format.' });
+        if (eventTime && !/^\d{2}:\d{2}$/.test(eventTime))
+            return res.status(400).json({ error: 'Invalid time format.' });
+        if (eventEndTime && !/^\d{2}:\d{2}$/.test(eventEndTime))
+            return res.status(400).json({ error: 'Invalid end time format.' });
+        if (location && location.length > 2000)
+            return res.status(400).json({ error: 'Location must be 2000 characters or fewer.' });
+
+        const parseTime = (t) => /^\d{2}:\d{2}$/.test(t ?? '') ? `${t}:00` : null;
+
+        await getPool().request()
+            .input('id',             sql.Int,          id)
+            .input('submitter_name', sql.NVarChar(100), submitterName.trim())
+            .input('title',          sql.NVarChar(200), title.trim())
+            .input('description',    sql.NVarChar(2000), description?.trim() || null)
+            .input('is_all_day',     sql.Bit,           isAllDay ? 1 : 0)
+            .input('event_date',     sql.Date,          eventDate || null)
+            .input('event_end_date', sql.Date,          eventEndDate || null)
+            .input('event_time',     sql.NVarChar(8),   parseTime(eventTime))
+            .input('event_end_time', sql.NVarChar(8),   parseTime(eventEndTime))
+            .input('location',       sql.NVarChar(2000), location?.trim() || null)
+            .execute('dbo.usp_UpdateAnnouncementRequest');
+
+        console.log(`[Announcements] Request #${id} updated`);
+        return res.json({ success: true });
+    } catch (err) {
+        console.error('[Announcements] PATCH /requests/:id error:', err);
+        if (err.message?.includes('not found')) return res.status(404).json({ error: err.message });
+        return res.status(500).json({ error: 'Failed to update announcement request.' });
+    }
+});
+
+
 
 // ── POST /api/announcements/requests/mark-added ───────────────────────────────
 // Auth required — editor or bishopric

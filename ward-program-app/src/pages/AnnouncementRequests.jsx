@@ -220,6 +220,12 @@ export default function AnnouncementRequests() {
 
                                     {/* Actions */}
                                     <div className="flex flex-col gap-2 shrink-0">
+                                        <button
+                                            onClick={() => navigate(`/announcement-requests/${req.id}/edit`)}
+                                            className="btn-secondary text-xs px-3 py-1.5"
+                                        >
+                                            ✏️ Edit
+                                        </button>
                                         {req.status === 'pending' && (
                                             <button
                                                 onClick={() => updateStatus(req.id, 'dismissed')}
