@@ -616,16 +616,19 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
             case 'customText': {
               const customText = item.text?.trim() ?? '';
               if (customText) {
-                pdf.setFontSize(meetSizes.headingPt); pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor(0, 0, 0);
-                const customLines = pdf.splitTextToSize(customText, halfWidth - 0.6);
-                pdf.text(customLines, p2RightX + 0.1, yPosMeet);
-                yPosMeet += customLines.length * meetSizes.headingLineH + 0.08;
+                pdf.setFontSize(meetSizes.headingPt);
+                pdf.setFont('helvetica', 'italic');
+                pdf.text(customText,
+                  p2RightX + (halfWidth - 0.3) / 2, yPosMeet,
+                  { align: 'center', maxWidth: halfWidth - 0.4 });
+                pdf.setFont('helvetica', 'normal');
+                yPosMeet += meetSizes.headingLineH + 0.08;
               } else {
                 yPosMeet += 2 * meetSizes.bodyLineH;
               }
               break;
             }
+            
             case 'announce':
               pdf.setFontSize(meetSizes.bodyPt + 1);
               pdf.setFont('helvetica', 'italic');

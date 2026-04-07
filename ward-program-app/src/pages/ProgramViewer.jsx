@@ -397,7 +397,9 @@ function ProgramViewer() {
               )}
               
               {item.type === 'customText' && item.text?.trim() && (
-                <p className="font-bold">{item.text}</p>
+                <p className="text-sm italic text-center text-gray-500 dark:text-slate-400">
+                  {item.text}
+                </p>
               )}
 
             </div>

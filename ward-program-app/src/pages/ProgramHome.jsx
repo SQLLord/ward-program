@@ -662,7 +662,7 @@ function ProgramHome() {
                   // ── Custom Text ────────────────────────────────────────────
                   if (item.type === 'customText') {
                     return item.text?.trim() ? (
-                      <p key={i} className="font-bold text-sm text-gray-800 dark:text-slate-100">
+                      <p key={i} className="text-sm italic text-center text-gray-500 dark:text-slate-400">
                         {item.text}
                       </p>
                     ) : (
@@ -734,12 +734,13 @@ function ProgramHome() {
                       <p className="text-xs mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                         <a
                           href={buildGoogleCalendarLink({
-                            title:    ann.title,
-                            date:     ann.date,
-                            endDate:  ann.endDate,
-                            time:     ann.isAllDay ? null : ann.time,
-                            endTime:  ann.isAllDay ? null : ann.endTime,
-                            location: ann.location,
+                            title:       ann.title,
+                            date:        ann.date,
+                            endDate:     ann.endDate,
+                            time:        ann.isAllDay ? null : ann.time,
+                            endTime:     ann.isAllDay ? null : ann.endTime,
+                            location:    ann.location,
+                            description: isUnlocked ? ann.description : undefined,  // ← ADD
                           })}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -758,6 +759,7 @@ function ProgramHome() {
                             time:     ann.isAllDay ? null : ann.time,
                             endTime:  ann.isAllDay ? null : ann.endTime,
                             location: ann.location,
+                            description: isUnlocked ? ann.description : undefined,  // ← ADD
                           })}
                           className="inline-flex items-center gap-0.5 text-blue-600 dark:text-blue-400
                                      underline hover:text-blue-800 dark:hover:text-blue-300

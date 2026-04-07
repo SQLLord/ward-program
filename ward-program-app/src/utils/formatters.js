@@ -94,7 +94,7 @@ export const buildMapsLink = (location) => {
  * @param {{ title, date, endDate, time, endTime, location }} ann
  * @returns {string|null}
  */
-export const buildGoogleCalendarLink = ({ title, date, endDate, time, endTime, location }) => {
+export const buildGoogleCalendarLink = ({ title, date, endDate, time, endTime, location, description }) => {
   if (!date) return null;
 
   let dates;
@@ -119,7 +119,7 @@ export const buildGoogleCalendarLink = ({ title, date, endDate, time, endTime, l
     dates,
   });
   if (location) params.set('location', location);
-
+  if (description) params.set('details', description);  // ← ADD
   return `https://www.google.com/calendar/render?${params.toString()}`;
 };
 
@@ -127,7 +127,7 @@ export const buildGoogleCalendarLink = ({ title, date, endDate, time, endTime, l
  * Triggers a download of an .ics calendar file for an announcement.
  * @param {{ title, date, endDate, time, endTime, location }} ann
  */
-export const downloadIcs = ({ title, date, endDate, time, endTime, location }) => {
+export const downloadIcs = ({ title, date, endDate, time, endTime, location, description }) => {
   if (!date) return;
 
   const now          = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -152,7 +152,7 @@ export const downloadIcs = ({ title, date, endDate, time, endTime, location }) =
     dtEnd   = `DTEND;VALUE=DATE:${endStr}`;
   }
 
-  const lines = [
+   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//WardPrograms//EN',
@@ -163,6 +163,7 @@ export const downloadIcs = ({ title, date, endDate, time, endTime, location }) =
     dtEnd,
     `SUMMARY:${safeTitle}`,
     safeLocation ? `LOCATION:${safeLocation}` : '',
+    description ? `DESCRIPTION:${description.replace(/\n/g, '\\n').replace(/,/g, '\\,')}` : '',  // ← ADD
     'END:VEVENT',
     'END:VCALENDAR',
   ].filter(Boolean).join('\r\n');

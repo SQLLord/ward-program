@@ -295,7 +295,7 @@ export function StepPreviewPanel({
                         )}
                         {item.type === 'customText' && (
                           item.text?.trim()
-                            ? <span className="font-bold text-gray-900 dark:text-slate-100">{item.text}</span>
+                            ? <span className="italic text-center block text-gray-500 dark:text-slate-400">{item.text}</span>
                             : <span className="block h-[2em] border-l-2 border-dashed border-amber-400 dark:border-amber-600 ml-1 opacity-60" title="Spacing block — 2 blank lines in PDF" />
                         )}
                       </li>
