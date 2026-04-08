@@ -10,6 +10,7 @@ import { StepPreviewPanel } from '../components/StepPreviewPanel';
 import { calculatePanelHealth } from '../utils/panelHealth';
 import { PanelHealthBar } from '../components/PanelHealthBar';
 import { PrintSettingsFlyout } from '../components/PrintSettingsFlyout';
+import SaveAsTemplateModal from '../components/SaveAsTemplateModal';
 
 function ProgramBuilder() {
   const { id } = useParams();
@@ -59,7 +60,7 @@ function ProgramBuilder() {
     }
   };
 
-
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
   
   // ── Step change — gate forward navigation on overflow ───────────────────
   const handleStepChange = (newStep) => {
@@ -96,45 +97,54 @@ function ProgramBuilder() {
   // ── Shared prev/next nav bar ─────────────────────────────────────────────
   const StepNav = () => {
     const currentHealth = stepHealth(step);
-    const isBlocked     = currentHealth?.status === 'overflow';
-    const isWarning     = currentHealth?.status === 'warning';
+    const isBlocked = currentHealth?.status === 'overflow';
+    const isWarning = currentHealth?.status === 'warning';
 
     return (
-      <div className="flex items-center justify-between gap-3 py-2">
-        <button
-          onClick={() => handleStepChange(Math.max(1, step - 1))}
-          disabled={step === 1}
-          className="btn-secondary disabled:opacity-50"
-        >
-          ← Previous
-        </button>
-
-        <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
-          Step {step} of {BUILDER_STEPS.length} — {BUILDER_STEPS[step - 1].name}
-          {currentHealth && (
-            <span className="ml-2">
-              <PanelHealthBar health={currentHealth} compact />
-            </span>
-          )}
-        </span>
-
-        {/* Step 5 — no nav button, header buttons handle publish/republish */}
-        {step === BUILDER_STEPS.length ? (
-          <div className="w-32" /> 
-        ) : (
+      <div>
+        <div className="flex items-center justify-between gap-3 py-2">
           <button
-            onClick={() => handleStepChange(step + 1)}
-            disabled={isBlocked}
-            title={isBlocked ? 'Fix panel overflow before advancing' : ''}
-            className={`transition font-semibold px-6 py-3 rounded-lg
-              ${isBlocked
-                ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 cursor-not-allowed border border-red-300 dark:border-red-700'
-                : isWarning
-                  ? 'btn-warning'
-                  : 'btn-primary'
-              }`}
+            onClick={() => handleStepChange(Math.max(1, step - 1))}
+            disabled={step === 1}
+            className="btn-secondary disabled:opacity-50"
           >
-            {isBlocked ? '🔴 Fix Overflow First' : isWarning ? '⚠️ Next →' : 'Next →'}
+            ← Previous
+          </button>
+
+          <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
+            Step {step} of {BUILDER_STEPS.length} — {BUILDER_STEPS[step - 1].name}
+            {currentHealth && (
+              <span className="ml-2">
+                <PanelHealthBar health={currentHealth} compact />
+              </span>
+            )}
+          </span>
+
+          {step === BUILDER_STEPS.length ? (
+            <div className="w-32" />
+          ) : (
+            <button
+              onClick={() => handleStepChange(step + 1)}
+              disabled={isBlocked}
+              title={isBlocked ? 'Fix panel overflow before advancing' : ''}
+              className={`transition font-semibold px-6 py-3 rounded-lg
+                ${isBlocked
+                  ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 cursor-not-allowed border border-red-300 dark:border-red-700'
+                  : isWarning ? 'btn-warning' : 'btn-primary'
+                }`}
+            >
+              {isBlocked ? '🔴 Fix Overflow First' : isWarning ? '⚠️ Next →' : 'Next →'}
+            </button>
+          )}
+        </div>
+
+        {/* Save as Template — below the nav row, only on step 5 */}
+        {step === 5 && (
+          <button
+            onClick={() => setShowTemplateModal(true)}
+            className="btn-secondary w-full mt-2"
+          >
+            📋 Save as Template
           </button>
         )}
       </div>
@@ -155,6 +165,13 @@ function ProgramBuilder() {
         handlePublishConflictBoth={handlePublishConflictBoth}
         handleDiscardAndExit={handleDiscardAndExit}
       />
+
+      {showTemplateModal && (
+            <SaveAsTemplateModal
+                formData={formData}
+                onClose={() => setShowTemplateModal(false)}
+            />
+        )}
 
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">

@@ -20,6 +20,7 @@ import WardDefaults from './pages/WardDefaults';
 import ImageLibrary from './pages/ImageLibrary';
 import AnnouncementRequests from './pages/AnnouncementRequests';
 import AnnouncementRequestEdit from './pages/AnnouncementRequestEdit';
+import TemplateManager from './pages/TemplateManager';
 
 
 
@@ -119,6 +120,10 @@ function NavBar() {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
                       📢 <span>Announcement Requests</span>
                   </Link>
+                  <Link to="/admin/templates" onClick={handleNavClick}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+                    📋 <span>Templates</span>
+                  </Link>
                 </div>
 
                 {/* ── Dark Mode Toggle ───────────────────────────────────── */}
@@ -209,6 +214,7 @@ function App() {
                     <Route path="/admin/image-library" element={<ProtectedRoute roles={['bishopric', 'editor']}><ImageLibrary /></ProtectedRoute>} />
                     <Route path="/announcement-requests" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequests /></ProtectedRoute>} />
                     <Route path="/announcement-requests/:id/edit" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequestEdit /></ProtectedRoute>} />
+                    <Route path="/admin/templates" element={<ProtectedRoute roles={['bishopric', 'editor']}><TemplateManager /></ProtectedRoute>} />
                   </Routes>
                 </Router>
               </ErrorProvider>

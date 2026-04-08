@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useProgramContext } from '../context/ProgramContext';
@@ -42,6 +42,22 @@ function AdminDashboard() {
 
   const handleCreateNew = () => navigate('/builder/new');
 
+  const [templates, setTemplates]           = useState([]);
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+
+  const loadTemplates = async () => {
+      setLoadingTemplates(true);
+      try {
+          const data = await api.get('/templates');
+          setTemplates(data);
+      } catch (err) {
+          showToast('❌ Failed to load templates.', 'error');
+      } finally {
+          setLoadingTemplates(false);
+      }
+  };
+
   const loadSummary = useCallback(async (pageNum = 1) => {
     try {
       if (pageNum === 1) setLoading(true);
@@ -71,6 +87,18 @@ function AdminDashboard() {
   useEffect(() => { loadSummary(1); }, [loadSummary]);
 
   const handleLoadMore = () => loadSummary(page + 1);
+
+  const templateMenuRef = useRef(null);
+
+  useEffect(() => {
+      const handleClickOutside = (e) => {
+          if (templateMenuRef.current && !templateMenuRef.current.contains(e.target)) {
+              setShowTemplateMenu(false);
+          }
+      };
+      if (showTemplateMenu) document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showTemplateMenu]);
 
   // ── PUBLISH ───────────────────────────────────────────────────────────────
   const handlePublish = async (programId) => {
@@ -369,12 +397,57 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
+      {/* ── HEADER ── */}
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-lds-blue dark:text-slate-100">Program Dashboard</h1>
-        <button onClick={handleCreateNew} className="btn-primary">
-          ➕ Create New Program
-        </button>
+          <h1 className="text-3xl font-bold text-lds-blue dark:text-slate-100">Program Dashboard</h1>
+          <div className="flex items-center gap-3">
+              <div className="relative" ref={templateMenuRef}>
+                  <button
+                      onClick={() => {
+                          setShowTemplateMenu(m => !m);
+                          if (!showTemplateMenu) loadTemplates();
+                      }}
+                      className="btn-secondary flex items-center gap-2"
+                  >
+                      📋 New from Template ▾
+                  </button>
+                  {showTemplateMenu && (
+                      <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-slate-800
+                                      rounded-xl shadow-xl border border-gray-200 dark:border-slate-700
+                                      z-10 overflow-hidden">
+                          {loadingTemplates ? (
+                              <p className="text-sm text-gray-400 dark:text-slate-500 p-4 text-center">
+                                  ⏳ Loading...
+                              </p>
+                          ) : templates.length === 0 ? (
+                              <p className="text-sm text-gray-400 dark:text-slate-500 p-4 text-center">
+                                  No templates yet
+                              </p>
+                          ) : (
+                              templates.map(t => (
+                                  <button
+                                      key={t.id}
+                                      onClick={() => {
+                                          setShowTemplateMenu(false);
+                                          navigate(`/builder/new?template=${t.id}`);
+                                      }}
+                                      className="w-full text-left px-4 py-3 text-sm
+                                                hover:bg-gray-50 dark:hover:bg-slate-700
+                                                text-gray-800 dark:text-slate-200 transition
+                                                border-b border-gray-100 dark:border-slate-700
+                                                last:border-0"
+                                  >
+                                      📋 {t.name}
+                                  </button>
+                              ))
+                          )}
+                      </div>
+                  )}
+              </div>
+              <button onClick={handleCreateNew} className="btn-primary">
+                  ➕ Create New Program
+              </button>
+          </div>
       </div>
 
       {/* ── SUMMARY STATS BAR ──────────────────────────────────────────────── */}

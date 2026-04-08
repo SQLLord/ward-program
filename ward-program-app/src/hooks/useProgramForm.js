@@ -4,7 +4,7 @@
 // CRUD handlers, and save/publish logic for ProgramBuilder.
 // ============================================================
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useProgramContext } from '../context/ProgramContext';
 import { getHymnTitle } from '../data/hymns';
 import { useError } from '../context/ErrorContext';
@@ -112,7 +112,9 @@ export function useProgramForm(id) {
       
     });
   }, [loadWardName]);
-
+  
+  const location = useLocation();
+  
   // ============================================================
   // LOAD PROGRAM DATA
   // ============================================================
@@ -188,6 +190,61 @@ export function useProgramForm(id) {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const templateId = params.get('template');
+
+    if (id === 'new' && templateId) {
+        // Load from template
+        const loadFromTemplate = async () => {
+            try {
+                const result = await api.get(`/templates/${templateId}`);
+                const t = result.template;
+                prepareAndLoad({
+                    // Template fields
+                    programName:          t.programName ?? '',
+                    cover:                t.cover ?? {},
+                    meetingOrder:         t.meetingOrder ?? {},
+                    announcementSettings: t.announcementSettings ?? { preset: 'standard' },
+                    leadershipSettings:   t.leadershipSettings   ?? { preset: 'standard' },
+                    leadershipMode:       t.leadershipMode        ?? 'default',
+                    schedulesMode:        t.schedulesMode          ?? 'default',
+                    schedulesPublic:      t.schedulesPublic        !== false,
+                    // New program fields — always fresh
+                    date:         new Date().toISOString().slice(0, 10),
+                    status:       'draft',
+                    announcements: [],
+                    leadership:    [],
+                    schedules:     [],
+                });
+            } catch (err) {
+                logger.error('[useProgramForm] Failed to load template:', err);
+                // Fall back to blank new program
+                prepareAndLoad({
+                    date: new Date().toISOString().slice(0, 10),
+                    status: 'draft',
+                    programName: '',
+                    cover: {
+                        image: '', imageUrl: '', imageSource: 'url',
+                        imageBleed: false, imageHeightPct: 50,
+                        quote: '', attribution: '', layout: [],
+                        printSettings: { preset: 'standard', bodySize: 9, headingSize: 11 },
+                    },
+                    meetingOrder: {
+                        conducting: '', presiding: '', chorister: '', accompanist: '',
+                        meetingItems: [],
+                        printSettings: { preset: 'standard', bodySize: 9, headingSize: 11 },
+                    },
+                    announcementSettings: { preset: 'standard', bodySize: 9, headingSize: 11 },
+                    leadershipSettings:   { preset: 'standard', bodySize: 9, headingSize: 11 },
+                    announcements: [], leadership: [], leadershipPublic: true,
+                    schedules: [], schedulesPublic: true,
+                });
+            }
+        };
+        loadFromTemplate();
+        return;
+    }
+
     if (id === 'new') {
       prepareAndLoad({
         date: new Date().toISOString().slice(0, 10),
@@ -226,7 +283,7 @@ export function useProgramForm(id) {
       }
     };
     loadFromApi();
-  }, [id, prepareAndLoad]);
+  }, [id, prepareAndLoad, location.search]);
 
   // ============================================================
   // LOAD WARD DEFAULTS

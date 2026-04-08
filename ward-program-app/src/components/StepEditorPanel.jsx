@@ -9,6 +9,7 @@ import { generateId } from '../utils/generateId';
 import { AnnouncementRow } from './AnnouncementRow';
 import ImportAnnouncementsModal from './ImportAnnouncementsModal';
 import { api } from '../utils/api';
+import ImportAnnouncementsFromProgramModal from './ImportAnnouncementsFromProgramModal';
 
 
 export function StepEditorPanel({
@@ -34,6 +35,7 @@ export function StepEditorPanel({
   const [newAnnouncementId, setNewAnnouncementId] = useState(null);
   const [pendingRequestCount, setPendingRequestCount] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showImportFromProgramModal, setShowImportFromProgramModal] = useState(false);
   const ITEM_LABELS = {
     childrensHymn: "Children's Song",
   };
@@ -272,21 +274,27 @@ export function StepEditorPanel({
       {step === 2 && (
         <div>
           <div className="flex gap-2 mb-3">
-              <button onClick={() => {
-                  const newId = generateId();
-                  setNewAnnouncementId(newId);
-                  addAnnouncement(newId);
-                  onFirstItemAdded?.();
-              }} className="btn-primary btn-small">
-                  + Add Announcement
-              </button>
-              <button
+            <button onClick={() => {
+                const newId = generateId();
+                setNewAnnouncementId(newId);
+                addAnnouncement(newId);
+                onFirstItemAdded?.();
+            }} className="btn-primary btn-small">
+                + Add Announcement
+            </button>
+            <button
                 onClick={() => setShowImportModal(true)}
                 className="btn-secondary btn-small"
-              >
+            >
                 📥 Import Requests{pendingRequestCount !== null && pendingRequestCount > 0
                     ? ` (${pendingRequestCount})`
                     : pendingRequestCount === 0 ? ' (0)' : ''}
+            </button>
+            <button
+                onClick={() => setShowImportFromProgramModal(true)}
+                className="btn-secondary btn-small"
+            >
+                📋 Import from Program
             </button>
           </div>
           <DraggableList
@@ -315,6 +323,16 @@ export function StepEditorPanel({
               }}
             />
           )}
+          {showImportFromProgramModal && (
+            <ImportAnnouncementsFromProgramModal
+                currentProgramId={formData.id}
+                onClose={() => setShowImportFromProgramModal(false)}
+                onImport={(announcements) => {
+                    announcements.forEach(ann => addAnnouncement(null, ann));
+                    onFirstItemAdded?.();
+                }}
+            />
+        )}
         </div>
       )}
 

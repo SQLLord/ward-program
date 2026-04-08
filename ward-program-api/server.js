@@ -15,6 +15,7 @@ const imageRouter = require('./routes/images');
 const { doubleCsrf } = require('csrf-csrf');
 const announcementsRouter = require('./routes/announcements')
 const contactRouter = require('./routes/contact');
+const templatesRouter = require('./routes/templates');
 
 const app  = express();
 app.set('trust proxy', 1);
@@ -217,6 +218,7 @@ app.use('/api/proxy',    proxyRouter);
 app.use('/api/images',  imageRouter);
 app.use('/api/announcements', announcementsRouter);
 app.use('/api/contact', contactRouter);
+app.use('/api/templates', templatesRouter);
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, _req, res, _next) => {
