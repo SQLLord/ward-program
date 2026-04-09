@@ -35,9 +35,9 @@ function AdminDashboard() {
   );
 
   const sortedPrograms = [...filteredPrograms].sort((a, b) => {
-    if (a.status === 'published' && b.status !== 'published') return -1;
-    if (b.status === 'published' && a.status !== 'published') return 1;
-    return new Date(b.date) - new Date(a.date);
+      const dateDiff = new Date(b.date) - new Date(a.date);
+      if (dateDiff !== 0) return dateDiff;
+      return b.id - a.id;
   });
 
   const handleCreateNew = () => navigate('/builder/new');

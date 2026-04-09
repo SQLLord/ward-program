@@ -38,6 +38,7 @@ function ProgramBuilder() {
     wardName,
     importedRequestIds,       // ← ADD
     recordImportedRequests,   // ← ADD
+    saving,
   } = useProgramForm(id);
 
   const updateProgramName = (val) => updateField('programName', val);
@@ -184,58 +185,45 @@ function ProgramBuilder() {
           {/* Cancel — always visible */}
           <button
             onClick={() => setCancelModal(true)}
-            className="btn-danger"
+            disabled={saving}
+            className="btn-danger disabled:opacity-50"
           >
             ✕ Cancel
           </button>
 
           {formData.status === 'published' ? (
-            <>
-              {/* Editing a published program — Save & Republish ONLY */}
               <button
-                onClick={handleSaveAndRepublish}
-                disabled={!health?.allClear}
-                title={
-                  !health?.allClear
-                    ? 'Fix panel overflows before republishing'
-                    : 'Save changes and keep published'
-                }
-                className={`transition font-semibold px-4 py-2 rounded-lg text-sm
-                  ${!health?.allClear
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 cursor-not-allowed border border-red-300 dark:border-red-700'
-                    : 'btn-primary'
-                  }`}
+                  onClick={handleSaveAndRepublish}
+                  disabled={!health?.allClear || saving}
+                  className={`transition font-semibold px-4 py-2 rounded-lg text-sm
+                      ${!health?.allClear || saving
+                          ? 'bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 cursor-not-allowed border border-red-300 dark:border-red-700'
+                          : 'btn-primary'
+                      }`}
               >
-                {!health?.allClear ? '🔴 Fix Overflows' : '💾 Save & Republish'}
+                  {saving ? '⏳ Saving...' : !health?.allClear ? '🔴 Fix Overflows' : '💾 Save & Republish'}
               </button>
-            </>
           ) : (
-            <>
-              {/* New, draft, copy, or archived — Save as Draft + Publish */}
-              <button
-                onClick={handleSaveDraft}
-                className="btn-secondary"
-                title="Save as draft without publishing"
-              >
-                📄 Save as Draft
-              </button>
-              <button
-                onClick={handlePublish}
-                disabled={!health?.allClear}
-                title={
-                  !health?.allClear
-                    ? 'Fix panel overflows before publishing'
-                    : 'Publish this program'
-                }
-                className={`transition font-semibold px-4 py-2 rounded-lg text-sm
-                  ${!health?.allClear
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 cursor-not-allowed border border-red-300 dark:border-red-700'
-                    : 'btn-primary'
-                  }`}
-              >
-                {!health?.allClear ? '🔴 Fix Overflows' : '🚀 Publish'}
-              </button>
-            </>
+              <>
+                  <button
+                      onClick={handleSaveDraft}
+                      disabled={saving}
+                      className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                      {saving ? '⏳ Saving...' : '📄 Save as Draft'}
+                  </button>
+                  <button
+                      onClick={handlePublish}
+                      disabled={!health?.allClear || saving}
+                      className={`transition font-semibold px-4 py-2 rounded-lg text-sm
+                          ${!health?.allClear || saving
+                              ? 'bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 cursor-not-allowed border border-red-300 dark:border-red-700'
+                              : 'btn-primary'
+                          }`}
+                  >
+                      {saving ? '⏳ Publishing...' : !health?.allClear ? '🔴 Fix Overflows' : '🚀 Publish'}
+                  </button>
+              </>
           )}
 
         </div>

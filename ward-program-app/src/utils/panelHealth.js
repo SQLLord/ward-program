@@ -287,7 +287,7 @@ const calcAnnouncements = (formData) => {
   let used = 0;
 
   // "Announcements" heading
-  used += sizes.titleLineH + 0.15;
+  used += sizes.titleLineH + 0.25;
 
   const announcements = formData.announcements ?? [];
   for (const ann of announcements) {

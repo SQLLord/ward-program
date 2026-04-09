@@ -314,21 +314,27 @@ export function StepEditorPanel({
 
           {showImportModal && (
             <ImportAnnouncementsModal
-              onClose={() => setShowImportModal(false)}
-              alreadyImported={importedRequestIds}
-              onImport={(announcements, requestIds) => {
-                announcements.forEach(ann => addAnnouncement(null, ann));
-                onImportRequests(requestIds);
-                onFirstItemAdded?.();
-              }}
+                onClose={() => setShowImportModal(false)}
+                alreadyImported={importedRequestIds}
+                onImport={(announcements, requestIds) => {
+                    announcements.forEach(ann => {
+                        const newId = generateId();
+                        addAnnouncement(newId, ann);
+                    });
+                    onImportRequests(requestIds);
+                    onFirstItemAdded?.();
+                }}
             />
-          )}
+        )}
           {showImportFromProgramModal && (
             <ImportAnnouncementsFromProgramModal
                 currentProgramId={formData.id}
                 onClose={() => setShowImportFromProgramModal(false)}
                 onImport={(announcements) => {
-                    announcements.forEach(ann => addAnnouncement(null, ann));
+                    announcements.forEach(ann => {
+                        const newId = generateId();
+                        addAnnouncement(newId, ann);
+                    });
                     onFirstItemAdded?.();
                 }}
             />

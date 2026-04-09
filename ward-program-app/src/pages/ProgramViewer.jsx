@@ -82,7 +82,7 @@ function ProgramViewer() {
       <div className="flex flex-col items-center justify-center py-24">
         <div className="text-5xl mb-4">😕</div>
         <p className="text-lg text-gray-600 dark:text-slate-300 mb-4">Program not found</p>
-        <Link to="/admin" className="btn-secondary">← Back to Admin</Link>
+        <Link to="/admin" className="btn-secondary">← Back to Dashboard</Link>
       </div>
     );
   }

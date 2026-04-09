@@ -675,7 +675,7 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
     pdf.setFontSize(annSizes.titlePt);
     pdf.setFont('helvetica', 'bold');
     pdf.text('Announcements', p2LeftX + 0.1, yPos + annSizes.titleLineH);
-    yPos += annSizes.titleLineH + 0.15;  // ← was 0.3, tightened to match panelHealth
+    yPos += annSizes.titleLineH + 0.25;  // ← was 0.3, tightened to match panelHealth
 
     if (program.announcements?.length > 0) {
       program.announcements.forEach(ann => {

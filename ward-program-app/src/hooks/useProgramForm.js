@@ -92,7 +92,7 @@ export function useProgramForm(id) {
   const [imageUrlLoading, setImageUrlLoading]         = useState(false);
   const lastFetchedUrlRef                             = useRef('');
   const [importedRequestIds, setImportedRequestIds] = useState(new Set());
-
+  const [saving, setSaving] = useState(false);
   const recordImportedRequests = useCallback((ids) => {
     setImportedRequestIds(prev => new Set([...prev, ...ids]));
 }, []);
@@ -539,40 +539,46 @@ export function useProgramForm(id) {
   // SAVE / PUBLISH HANDLERS
   // ============================================================
   const handleSaveDraft = async () => {
+    if (saving) return;                          // ← guard
     if (formData.status === 'published') { setRepublishModal(true); return; }
+    setSaving(true);                             // ← lock
+    showToast('💾 Saving draft, please wait...');
     const updated = { ...formData, status: 'draft' };
     try {
-      if (!formData.id) {
-        await createProgram(updated);
-      } else {
-        await api.put(`/programs/${formData.id}`, updated);
-        if (importedRequestIds.size > 0) {
-          try {
-              await api.post('/announcements/requests/mark-added', {
-                  requestIds: [...importedRequestIds],
-                  programId: formData.id,
-              });
-              setImportedRequestIds(new Set()); // clear after marking
-          } catch (err) {
-              // Non-fatal — log but don't fail the save
-              console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
-          }
+        if (!formData.id) {
+            await createProgram(updated);
+        } else {
+            await api.put(`/programs/${formData.id}`, updated);
+            if (importedRequestIds.size > 0) {
+                try {
+                    await api.post('/announcements/requests/mark-added', {
+                        requestIds: [...importedRequestIds],
+                        programId: formData.id,
+                    });
+                    setImportedRequestIds(new Set());
+                } catch (err) {
+                    console.warn('[ProgramForm] Failed to mark announcement requests as added:', err.message);
+                }
+            }
         }
-      }
-      showToast('✅ Draft saved successfully!');
-      setTimeout(() => navigate('/admin'), 1500);
+        showToast('✅ Draft saved successfully!');
+        setTimeout(() => navigate('/admin'), 1500);
     } catch (err) {
-      logger.error('[handleSaveDraft] failed:', err);
-      showToast('❌ Failed to save draft. Please try again.');
+        logger.error('[handleSaveDraft] failed:', err);
+        showToast('❌ Failed to save draft. Please try again.');
+        setSaving(false);                        // ← only unlock on failure; success navigates away
     }
   };
 
   const handleSaveAndRepublish = async () => {
+    if (saving) return;
     const currentHealth = calculatePanelHealth(formData, wardDefaults);
     if (!currentHealth?.allClear) {
-      showToast('❌ Cannot republish — one or more panels will overflow. Fix them first.');
-      return;
+        showToast('❌ Cannot republish — one or more panels will overflow. Fix them first.');
+        return;
     }
+    setSaving(true);
+    showToast('💾 Saving and republishing, please wait...');
     const publishedPrograms = await fetchPublishedPrograms();
     const sameDate = publishedPrograms.filter(
       (p) => p.status === 'published' && p.date === formData.date && p.id !== formData.id
@@ -608,11 +614,15 @@ export function useProgramForm(id) {
       } catch (err) {
         logger.error('[handleSaveAndRepublish] failed:', err);
         showToast('❌ Failed to republish. Please try again.');
+        setSaving(false);
       }
     }
   };
 
   const handleSaveAsDraft = async () => {
+    if (saving) return;
+    setSaving(true);
+    showToast('💾 Saving as draft, please wait...');
     try {
       const updated = { ...formData, status: 'draft' };
       await api.put(`/programs/${formData.id}`, updated);
@@ -635,15 +645,19 @@ export function useProgramForm(id) {
     } catch (err) {
       logger.error('[handleSaveAsDraft] failed:', err);
       showToast('❌ Failed to save as draft. Please try again.');
+      setSaving(false);
     }
   };
 
   const handlePublish = async () => {
+    if (saving) return;
     const currentHealth = calculatePanelHealth(formData, wardDefaults);
     if (!currentHealth?.allClear) {
-      showToast('❌ Cannot publish — one or more panels will overflow. Fix them first.');
-      return;
+        showToast('❌ Cannot publish — one or more panels will overflow. Fix them first.');
+        return;
     }
+    setSaving(true);
+    showToast('🚀 Publishing, please wait...');
     const publishedPrograms = await fetchPublishedPrograms();
     if (formData.id) {
       const sameDate = publishedPrograms.filter(
@@ -676,6 +690,7 @@ export function useProgramForm(id) {
         } catch (err) {
           logger.error('[handlePublish] existing program failed:', err);
           showToast('❌ Failed to publish. Please try again.');
+          setSaving(false);
         }
       }
       return;
@@ -703,11 +718,15 @@ export function useProgramForm(id) {
     } catch (err) {
       logger.error('[handlePublish] new program publish failed:', err);
       showToast('❌ Failed to publish. Please try again.');
+      setSaving(false);
     }
   };
 
   const handlePublishConflictOnly = async () => {
+    if (saving) return;
     setPublishConflictModal(null);
+    setSaving(true);
+    showToast('🚀 Publishing, please wait...');
     try {
       await publishProgram(formData.id, { conflict_action: 'archive_existing' });
       showToast('🚀 Program published and conflicting program archived!');
@@ -715,11 +734,15 @@ export function useProgramForm(id) {
     } catch (err) {
       logger.error('[handlePublishConflictOnly] failed:', err);
       showToast('❌ Failed to publish. Please try again.');
+      setSaving(false);
     }
   };
 
   const handlePublishConflictBoth = async () => {
+    if (saving) return;
     setPublishConflictModal(null);
+    setSaving(true);
+    showToast('🚀 Publishing, please wait...');
     try {
       if (formData.id) {
         await api.put(`/programs/${formData.id}`, { ...formData, status: 'published' });
@@ -742,6 +765,7 @@ export function useProgramForm(id) {
     } catch (err) {
       logger.error('[handlePublishConflictBoth] failed:', err);
       showToast('❌ Failed to publish. Please try again.');
+      setSaving(false);
     }
   };
 
@@ -816,6 +840,6 @@ export function useProgramForm(id) {
     wardDefaults,
     leadershipMode, schedulesMode,
     resetConfirm, setResetConfirm,
-    wardName, stakeName, importedRequestIds, recordImportedRequests
+    wardName, stakeName, importedRequestIds, recordImportedRequests, saving
   };
 }
