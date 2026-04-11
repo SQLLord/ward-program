@@ -3,13 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';  // ← ADD useRef, 
 import { PRESET_LABELS, DEFAULT_PRINT_SETTINGS, PRESETS } from '../utils/printSettingsUtils';
 
 const STEP_LABELS = {
-  1: { title: 'Cover Panel', hint: 'Affects date, quote, welcome, and custom text on the cover.' },
-  2: { title: 'Meeting Order Panel', hint: 'Affects program title, hymns, prayers, and speaker text.' },
-  3: { title: 'Announcements Panel', hint: 'Affects announcement titles and description text.' },
-  4: { title: 'Leadership & Schedules Panel', hint: 'Affects section headings on the leadership panel.' },
+  1: { title: 'Cover Panel',                   hint: 'Affects date, quote, welcome, and custom text on the cover.' },
+  2: { title: 'Announcements Panel',            hint: 'Affects announcement titles and description text.' },
+  3: { title: 'Meeting Order Panel',            hint: 'Affects program title, hymns, prayers, and speaker text.' },
+  4: { title: 'Leadership & Schedules Panel',   hint: 'Affects section headings on the leadership panel.' },
 };
 
-export function PrintSettingsFlyout({ step, formData, updateField }) {
+export function PrintSettingsFlyout({ step, formData, updateField, updateFields }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);  // ← ADD THIS
 
@@ -28,47 +28,41 @@ export function PrintSettingsFlyout({ step, formData, updateField }) {
   const getSettings = () => {
     switch (step) {
       case 1: return formData.cover?.printSettings ?? DEFAULT_PRINT_SETTINGS;
-      case 2: return formData.meetingOrder?.printSettings ?? DEFAULT_PRINT_SETTINGS;
-      case 3: return formData.announcementSettings ?? DEFAULT_PRINT_SETTINGS;
+      case 2: return formData.announcementSettings ?? DEFAULT_PRINT_SETTINGS;       // ← swap
+      case 3: return formData.meetingOrder?.printSettings ?? DEFAULT_PRINT_SETTINGS; // ← swap
       case 4: return formData.leadershipSettings ?? DEFAULT_PRINT_SETTINGS;
       default: return DEFAULT_PRINT_SETTINGS;
     }
-  };
+};
+  
 
   const updateSettings = (field, value) => {
     if (field === 'preset' && value !== 'custom') {
-      const resolved = PRESETS[value] ?? PRESETS.standard;
-      switch (step) {
-        case 1:
-          updateField(`cover.printSettings.preset`, value);
-          updateField(`cover.printSettings.bodySize`, resolved.bodyPt);
-          updateField(`cover.printSettings.headingSize`, resolved.headingPt);
-          return;
-        case 2:
-          updateField(`meetingOrder.printSettings.preset`, value);
-          updateField(`meetingOrder.printSettings.bodySize`, resolved.bodyPt);
-          updateField(`meetingOrder.printSettings.headingSize`, resolved.headingPt);
-          return;
-        case 3:
-          updateField(`announcementSettings.preset`, value);
-          updateField(`announcementSettings.bodySize`, resolved.bodyPt);
-          updateField(`announcementSettings.headingSize`, resolved.headingPt);
-          return;
-        case 4:
-          updateField(`leadershipSettings.preset`, value);
-          updateField(`leadershipSettings.bodySize`, resolved.bodyPt);
-          updateField(`leadershipSettings.headingSize`, resolved.headingPt);
-          return;
-        default: return;
-      }
+        const resolved = PRESETS[value] ?? PRESETS.standard;
+        const prefixes = {
+            1: 'cover.printSettings',
+            2: 'announcementSettings',       // ← was meetingOrder.printSettings
+            3: 'meetingOrder.printSettings', // ← was announcementSettings
+            4: 'leadershipSettings',
+        };
+        const prefix = prefixes[step];
+        if (!prefix) return;
+        updateFields([
+            { path: `${prefix}.preset`,      value },
+            { path: `${prefix}.bodySize`,    value: resolved.bodyPt },
+            { path: `${prefix}.headingSize`, value: resolved.headingPt },
+        ]);
+        return;
     }
-    switch (step) {
-      case 1: return updateField(`cover.printSettings.${field}`, value);
-      case 2: return updateField(`meetingOrder.printSettings.${field}`, value);
-      case 3: return updateField(`announcementSettings.${field}`, value);
-      case 4: return updateField(`leadershipSettings.${field}`, value);
-      default: return;
-    }
+    // custom field — single update is fine
+    const fieldPaths = {
+      1: `cover.printSettings.${field}`,
+      2: `announcementSettings.${field}`,        // ← swap
+      3: `meetingOrder.printSettings.${field}`,  // ← swap
+      4: `leadershipSettings.${field}`,
+    };
+    const path = fieldPaths[step];
+    if (path) updateField(path, value);
   };
 
   const settings = getSettings();
@@ -136,7 +130,7 @@ export function PrintSettingsFlyout({ step, formData, updateField }) {
               <div>
                 <label className="label text-xs">Body Size (pt)</label>
                 <input
-                  type="number" min={6} max={14} step={0.5}
+                  type="number" min={6} max={20} step={0.5}
                   value={settings.bodySize ?? 9}
                   onChange={e => updateSettings('bodySize', parseFloat(e.target.value))}
                   className="input text-sm"
@@ -145,7 +139,7 @@ export function PrintSettingsFlyout({ step, formData, updateField }) {
               <div>
                 <label className="label text-xs">Heading Size (pt)</label>
                 <input
-                  type="number" min={8} max={18} step={0.5}
+                  type="number" min={8} max={24} step={0.5}
                   value={settings.headingSize ?? 11}
                   onChange={e => updateSettings('headingSize', parseFloat(e.target.value))}
                   className="input text-sm"

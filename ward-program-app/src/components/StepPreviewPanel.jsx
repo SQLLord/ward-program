@@ -425,6 +425,13 @@ export function StepPreviewPanel({
       ════════════════════════════════════════════════════════════════════ */}
       {step === 4 && (() => {
         const sizes      = getResolvedSizes(formData.leadershipSettings);
+        // ── Scale font to match PDF panel width ratio ──────────────────────────
+        // PDF left panel table is 5.0" wide. Preview is 360px ≈ 3.75".
+        // Scale down proportionally so wrapping matches PDF behavior.
+        const PDF_TABLE_WIDTH_IN = 5.0;
+        const PREVIEW_WIDTH_IN   = 3.75;
+        const scale = PREVIEW_WIDTH_IN / PDF_TABLE_WIDTH_IN; // ≈ 0.75
+        const scaledBodyPt = Math.round(sizes.bodyPt * scale * 10) / 10;
         const leaderRows = leadershipMode === 'default'
           ? (wardDefaults.leadership ?? [])
           : (formData.leadership      ?? []);
@@ -438,12 +445,13 @@ export function StepPreviewPanel({
               caption={`Leadership & Schedules · PDF half-panel (3.75" wide · ${PDF_PANEL_HEIGHT_IN}" tall)`}
             >
               <div
-                style={{ fontSize: `${sizes.bodyPt}pt` }}
+                style={{ fontSize: `${scaledBodyPt}pt` }}
                 className="px-3 pt-3"
               >
                 {/* ── Leadership ── */}
                 <h6
                   style={{ fontSize: `${sizes.titlePt}pt` }}
+                 
                   className="font-bold text-lds-blue dark:text-blue-400 mb-1"
                 >
                   👥 Ward Leadership
@@ -451,17 +459,31 @@ export function StepPreviewPanel({
                 <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">
                   {leadershipMode === 'default' ? '🏛️ Ward Default' : '✏️ Customized'}
                 </p>
-                {leaderRows.length > 0 ? leaderRows.map((l, i) => (
-                  <p key={l.id ?? i}
-                     style={{ fontSize: `${sizes.bodyPt}pt` }}
-                     className="text-gray-900 dark:text-slate-100 leading-snug">
-                    <span className="font-semibold">{l.role ?? '(Role)'}</span>
-                    {' — '}
-                    {l.name ?? '(Name)'}
-                  </p>
-                )) : (
+                {leaderRows.length > 0 ? (
+                  <table style={{ fontSize: `${scaledBodyPt}pt`, width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr className="bg-blue-600 dark:bg-blue-800 text-white">
+                        <th className="text-left px-1 py-0.5" style={{ width: '30%', fontSize: `${scaledBodyPt}pt` }}>Role</th>
+                        <th className="text-left px-1 py-0.5" style={{ width: '38%', fontSize: `${scaledBodyPt}pt` }}>Name</th>
+                        <th className="text-left px-1 py-0.5" style={{ width: '32%', fontSize: `${scaledBodyPt}pt` }}>Phone</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leaderRows.map((l, i) => (
+                        <tr key={l.id ?? i}
+                            className={i % 2 === 0
+                              ? 'bg-gray-100 dark:bg-slate-700'
+                              : 'bg-white dark:bg-slate-800'}>
+                          <td className="px-1 py-0.5 text-gray-900 dark:text-slate-100" style={{ overflow: 'hidden', fontSize: `${scaledBodyPt}pt` }}>{l.role ?? ''}</td>
+                          <td className="px-1 py-0.5 text-gray-900 dark:text-slate-100" style={{ overflow: 'hidden', fontSize: `${scaledBodyPt}pt` }}>{l.name ?? ''}</td>
+                          <td className="px-1 py-0.5 text-gray-500 dark:text-slate-400" style={{ overflow: 'hidden', fontSize: `${scaledBodyPt}pt` }}>{l.phone ?? ''}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
                   <p className="text-gray-400 dark:text-slate-500 italic"
-                     style={{ fontSize: `${sizes.bodyPt}pt` }}>
+                    style={{ fontSize: `${scaledBodyPt}pt` }}>
                     (No leadership yet)
                   </p>
                 )}
@@ -478,17 +500,31 @@ export function StepPreviewPanel({
                   {' · '}
                   {formData.schedulesPublic === false ? '🔒 PDF Only' : '🌐 Public'}
                 </p>
-                {schedRows.length > 0 ? schedRows.map((s, i) => (
-                  <p key={s.id ?? i}
-                     style={{ fontSize: `${sizes.bodyPt}pt` }}
-                     className="text-gray-900 dark:text-slate-100 leading-snug">
-                    <span className="font-semibold">{s.organization ?? '(Org)'}</span>
-                    {' — '}
-                    {s.day} at {s.meeting_time ?? s.time}
-                  </p>
-                )) : (
+                {schedRows.length > 0 ? (
+                  <table style={{ fontSize: `${scaledBodyPt}pt`, width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr className="bg-blue-600 dark:bg-blue-800 text-white">
+                        <th className="text-left px-1 py-0.5" style={{ width: '42%', fontSize: `${scaledBodyPt}pt` }}>Organization</th>
+                        <th className="text-left px-1 py-0.5" style={{ width: '30%', fontSize: `${scaledBodyPt}pt` }}>Day</th>
+                        <th className="text-left px-1 py-0.5" style={{ width: '28%', fontSize: `${scaledBodyPt}pt` }}>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {schedRows.map((s, i) => (
+                        <tr key={s.id ?? i}
+                            className={i % 2 === 0
+                              ? 'bg-gray-100 dark:bg-slate-700'
+                              : 'bg-white dark:bg-slate-800'}>
+                          <td className="px-1 py-0.5 text-gray-900 dark:text-slate-100" style={{ fontSize: `${scaledBodyPt}pt` }}>{s.organization ?? ''}</td>
+                          <td className="px-1 py-0.5 text-gray-900 dark:text-slate-100" style={{ fontSize: `${scaledBodyPt}pt` }}>{s.day ?? ''}</td>
+                          <td className="px-1 py-0.5 text-gray-900 dark:text-slate-100" style={{ fontSize: `${scaledBodyPt}pt` }}>{s.meeting_time ?? s.time ?? ''}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
                   <p className="text-gray-400 dark:text-slate-500 italic"
-                     style={{ fontSize: `${sizes.bodyPt}pt` }}>
+                    style={{ fontSize: `${scaledBodyPt}pt` }}>
                     (No schedules yet)
                   </p>
                 )}

@@ -294,6 +294,21 @@ export function useProgramForm(id) {
     });
   }, [loadWardDefaults]);
 
+  const updateFields = (updates) => {
+      // updates = [{ path, value }, ...]
+      setFormData(prev => {
+          const updated = deepClone(prev);
+          for (const { path, value } of updates) {
+              const keys = path.split('.');
+              let current = updated;
+              for (let i = 0; i < keys.length - 1; i++) current = current[keys[i]];
+              current[keys[keys.length - 1]] = value;
+          }
+          return updated;
+      });
+  };
+
+
   // ============================================================
   // GENERIC FIELD UPDATER (unchanged)
   // ============================================================
@@ -307,6 +322,8 @@ export function useProgramForm(id) {
       return updated;
     });
   };
+
+
 
   // ============================================================
   // COVER BLOCK MANAGEMENT
@@ -591,6 +608,7 @@ export function useProgramForm(id) {
         : 'this date';
       setPendingPublishAction({ sameDate, isRepublish: true });
       setRepublishModal(false);
+      setSaving(false);
       setPublishConflictModal({ mode: 'sameDate', dateLabel, sameDate });
     } else {
       try {
@@ -669,6 +687,7 @@ export function useProgramForm(id) {
               weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
             })
           : 'this date';
+        setSaving(false);
         setPublishConflictModal({ mode: 'sameDate', dateLabel, sameDate });
       } else {
         try {
@@ -709,6 +728,7 @@ export function useProgramForm(id) {
               weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
             })
           : 'this date';
+        setSaving(false);
         setPublishConflictModal({ mode: 'sameDate', dateLabel, sameDate });
       } else {
         await createProgram({ ...formData, status: 'published' });
@@ -728,8 +748,10 @@ export function useProgramForm(id) {
     setSaving(true);
     showToast('🚀 Publishing, please wait...');
     try {
-      await publishProgram(formData.id, { conflict_action: 'archive_existing' });
+      await api.put(`/programs/${formData.id}`, { ...formData, status: 'published' });
+      await api.post(`/programs/${formData.id}/publish`, { conflict_action: 'archive_existing' });
       showToast('🚀 Program published and conflicting program archived!');
+      setSaving(false);
       setTimeout(() => navigate('/admin'), 1500);
     } catch (err) {
       logger.error('[handlePublishConflictOnly] failed:', err);
@@ -840,6 +862,6 @@ export function useProgramForm(id) {
     wardDefaults,
     leadershipMode, schedulesMode,
     resetConfirm, setResetConfirm,
-    wardName, stakeName, importedRequestIds, recordImportedRequests, saving
+    wardName, stakeName, importedRequestIds, recordImportedRequests, saving, updateFields
   };
 }

@@ -38,7 +38,7 @@ function ProgramBuilder() {
     wardName,
     importedRequestIds,       // ← ADD
     recordImportedRequests,   // ← ADD
-    saving,
+    saving, updateFields
   } = useProgramForm(id);
 
   const updateProgramName = (val) => updateField('programName', val);
@@ -316,6 +316,7 @@ function ProgramBuilder() {
                 step={step}
                 formData={formData}
                 updateField={updateField}
+                updateFields={updateFields}  // ← ADD
               />
             )}
           </div>

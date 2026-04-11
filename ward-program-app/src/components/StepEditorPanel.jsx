@@ -391,6 +391,9 @@ export function StepEditorPanel({
                     <div key={i} className="text-sm py-1 border-b border-gray-100 dark:border-slate-600 last:border-0">
                       <span className="font-medium dark:text-slate-200">{leader.role || '(Role)'}</span>
                       <span className="text-gray-500 dark:text-slate-400"> — {leader.name || '(Name)'}</span>
+                      {leader.phone && (
+                        <span className="text-gray-400 dark:text-slate-500"> · {leader.phone}</span>
+                      )}
                     </div>
                   ))
                 )}

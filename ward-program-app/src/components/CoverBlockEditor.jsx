@@ -5,6 +5,7 @@ import { COVER_BLOCK_TYPES } from '../constants/coverBlocks';
 import { useError } from '../context/ErrorContext';
 import { ImagePickerModal } from './ImagePickerModal';
 import { apiBase } from '../utils/api';
+import ReactDOM from 'react-dom';
 
 // ── Summary line per cover block type ────────────────────────────────────────
 function getCoverSummary(block, formData) {
@@ -190,11 +191,14 @@ export function CoverBlockEditor({
                           lastFetchedUrlRef.current = '';
                           showToast(`✅ Image uploaded to library: ${fileName}`);
                         } catch (err) {
-                          if (err.message === 'AUTH') {
-                            showToast('⚠️ Session expired — please log out and back in.', 'error');
+                          if (err.name === 'AbortError') {
+                              showToast('⚠️ Upload timed out — your connection may be slow. Please try again.', 'error');
+                          } else if (err.message === 'AUTH') {
+                              showToast('⚠️ Session expired — please log out and back in.', 'error');
                           } else {
-                            showToast(`⚠️ Upload failed: ${err.message}`, 'error');
+                              showToast(`⚠️ Upload failed: ${err.message}`, 'error');
                           }
+
                         } finally {
                           setImageUrlLoading(false);
                         }
@@ -246,10 +250,12 @@ export function CoverBlockEditor({
                         }));
                         showToast(`✅ Image uploaded to library: ${fileName}`);
                       } catch (err) {
-                        if (err.message === 'AUTH') {
-                          showToast('⚠️ Session expired — please log out and back in.', 'error');
+                        if (err.name === 'AbortError') {
+                            showToast('⚠️ Upload timed out — your connection may be slow. Please try again.', 'error');
+                        } else if (err.message === 'AUTH') {
+                            showToast('⚠️ Session expired — please log out and back in.', 'error');
                         } else {
-                          showToast(`⚠️ Upload failed: ${err.message}`, 'error');
+                            showToast(`⚠️ Upload failed: ${err.message}`, 'error');
                         }
                       } finally {
                         setImageUrlLoading(false);
@@ -298,22 +304,22 @@ export function CoverBlockEditor({
 
               {/* Image Picker Modal */}
               {showImagePicker && (
-                <ImagePickerModal
-                  onSelect={img => {
-                    setFormData(prev => ({
-                      ...prev,
-                      cover: {
-                        ...prev.cover,
-                        imageSource: 'library',
-                        imageId: img.id,
-                        image: '', imageUrl: '',
-                        imageFileName: img.fileName,
-                      },
-                    }));
-                    setShowImagePicker(false);
-                  }}
-                  onClose={() => setShowImagePicker(false)}
-                />
+                  <ImagePickerModal
+                    onSelect={img => {
+                      setFormData(prev => ({
+                        ...prev,
+                        cover: {
+                          ...prev.cover,
+                          imageSource: 'library',
+                          imageId: img.id,
+                          image: '', imageUrl: '',
+                          imageFileName: img.fileName,
+                        },
+                      }));
+                      setShowImagePicker(false);
+                    }}
+                    onClose={() => setShowImagePicker(false)}
+                  />
               )}
 
               {/* Full Bleed Toggle */}

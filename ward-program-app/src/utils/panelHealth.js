@@ -11,7 +11,7 @@ import { resolveImgHeight } from './coverImageUtils';
 
 // ── Status thresholds ────────────────────────────────────────────────────
 const getStatus = (pct, isCover = false) => {
-  if (pct > 120) return 'overflow';               // 🔴 hard block
+  if (pct > 500) return 'overflow';               // 🔴 hard block
   if (pct >= (isCover ? 95 : 90)) return 'warning'; // 🟡 caution
   return 'ok';                                     // 🟢 good
 };
@@ -110,11 +110,11 @@ const calcLeadership = (formData, wardDefaults) => {
   const sizes = getResolvedSizes(ps);
   const warnings = [];
 
-  const BASE_ROW_H = 0.20;
+  const BASE_ROW_H = 0.175;
   const BASE_FONT_PT = 8;
   const scaledRowH = BASE_ROW_H * (sizes.bodyPt / BASE_FONT_PT);
-  const headerRowH = scaledRowH * (sizes.headingPt / sizes.bodyPt);
-  const sectionTitleLineH = sizes.headingLineH;
+  const headerRowH = scaledRowH;
+  const sectionTitleLineH = sizes.titleLineH;
 
 
   let used = 0;
@@ -127,10 +127,25 @@ const calcLeadership = (formData, wardDefaults) => {
     : (wardDefaults?.leadership ?? []);
 
   if (leaderRows.length > 0) {
-    used += sectionTitleLineH + 0.10;
+    used += sectionTitleLineH + 0.02;
     used += headerRowH;
-    used += leaderRows.length * scaledRowH;  // ← flat: jsPDF rarely wraps table cells
-    used += 0.30;
+
+    // ── Account for cell wrapping at larger font sizes ──────────────────
+    // PDF column widths: Role=1.5", Name=1.9", Phone=1.6"
+    // Minus cellPadX (0.05") on each side = effective widths:
+    const ROLE_COL_W  = 1.5  - 0.10;
+    const NAME_COL_W  = 1.9  - 0.10;
+    const PHONE_COL_W = 1.6  - 0.10;
+
+    for (const l of leaderRows) {
+        const roleLines  = Math.max(1, estimateLines(l.role  ?? '', ROLE_COL_W,  sizes.bodyPt));
+        const nameLines  = Math.max(1, estimateLines(l.name  ?? '', NAME_COL_W,  sizes.bodyPt));
+        const phoneLines = Math.max(1, estimateLines(l.phone ?? '', PHONE_COL_W, sizes.bodyPt));
+        const maxLines   = Math.max(roleLines, nameLines, phoneLines);
+        used += maxLines * scaledRowH;
+    }
+
+    used += 0.12;
   }
 
   // ── Schedules table ───────────────────────────────────────────────────
@@ -141,11 +156,22 @@ const calcLeadership = (formData, wardDefaults) => {
     : (wardDefaults?.schedules ?? []);
 
   if (schedRows.length > 0) {
-    used += sectionTitleLineH + 0.08;
+    used += sectionTitleLineH + 0.02;
     used += headerRowH;
-    used += schedRows.length * scaledRowH;   // ← flat: same reasoning
-  }
 
+    // PDF column widths: Org=2.1", Day=1.5", Time=1.4"
+    const ORG_COL_W  = 2.1 - 0.10;
+    const DAY_COL_W  = 1.5 - 0.10;
+    const TIME_COL_W = 1.4 - 0.10;
+
+    for (const s of schedRows) {
+        const orgLines  = Math.max(1, estimateLines(s.organization ?? '', ORG_COL_W,  sizes.bodyPt));
+        const dayLines  = Math.max(1, estimateLines(s.day          ?? '', DAY_COL_W,  sizes.bodyPt));
+        const timeLines = Math.max(1, estimateLines(s.meeting_time ?? s.time ?? '', TIME_COL_W, sizes.bodyPt));
+        const maxLines  = Math.max(orgLines, dayLines, timeLines);
+        used += maxLines * scaledRowH;
+    }
+  }
   if (used / PANEL_HEIGHT_IN > 0.90) {
     warnings.push('Leadership and schedules panel is getting full. Consider reducing entries.');
   }

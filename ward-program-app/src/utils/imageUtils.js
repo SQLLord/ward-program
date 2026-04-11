@@ -126,13 +126,18 @@ export const uploadUrlToLibrary = async (url) => {
   const file = new File([blob], fileName, { type: blob.type });
   const formData = new FormData();
   formData.append('image', file);
+  const uploadController = new AbortController();
+  const uploadTimeout = setTimeout(() => uploadController.abort(), 30000); // 30s
 
   const uploadRes = await fetch(`${apiBase}/api/images`, {
     method: 'POST',
     credentials: 'include',
+    signal: uploadController.signal,  // ← ADDED for upload timeout
     body: formData,
     // ← No Content-Type header — browser sets multipart boundary automatically
   });
+
+  clearTimeout(uploadTimeout);
 
   if (uploadRes.status === 401 || uploadRes.status === 403) throw new Error('AUTH');
   if (!uploadRes.ok) {
@@ -161,11 +166,9 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp
 const MAX_IMAGE_SIZE_MB = 5;
 
 
-export  const uploadFileToLibrary = async (file) => {
+export const uploadFileToLibrary = async (file) => {
   if (!file) throw new Error('No file provided');
 
-  
-// ── Client-side validation ───────────────────────────────────────────────
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
     throw new Error(
       `Unsupported file type: ${file.type}. Only JPEG, PNG, GIF, and WebP are allowed.`
@@ -178,12 +181,17 @@ export  const uploadFileToLibrary = async (file) => {
   const formData = new FormData();
   formData.append('image', file);
 
+  const uploadController = new AbortController();
+  const uploadTimeout = setTimeout(() => uploadController.abort(), 30000);
 
   const uploadRes = await fetch(`${apiBase}/api/images`, {
     method: 'POST',
     credentials: 'include',
-    body: formData,  // ← required!
+    signal: uploadController.signal,
+    body: formData,
   });
+
+  clearTimeout(uploadTimeout);
 
   if (uploadRes.status === 401 || uploadRes.status === 403) throw new Error('AUTH');
   if (!uploadRes.ok) {

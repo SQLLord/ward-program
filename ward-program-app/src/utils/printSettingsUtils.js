@@ -11,15 +11,19 @@ export const LEFT_PANEL_WIDTH = 5.1;  // leadership + meeting order left half
 
 // ── Font size presets ──────────────────────────────────────────────────────
 export const PRESETS = {
-  compact:  { bodyPt: 8,   headingPt: 10  },
-  standard: { bodyPt: 9,   headingPt: 11  },
-  large:    { bodyPt: 10,  headingPt: 13  },
+  compact:  { bodyPt: 8,  headingPt: 10 },
+  standard: { bodyPt: 9,  headingPt: 11 },
+  large:    { bodyPt: 10, headingPt: 13 },
+  xl:       { bodyPt: 12, headingPt: 15 },
+  xxl:      { bodyPt: 14, headingPt: 17 },
 };
 
 export const PRESET_LABELS = [
   { value: 'compact',  label: '📦 Compact',  desc: 'Smaller text — fits more content' },
   { value: 'standard', label: '📄 Standard', desc: 'Default sizing — works for most programs' },
   { value: 'large',    label: '🔤 Large',    desc: 'Bigger text — fewer items per page' },
+  { value: 'xl',       label: '🔡 XL',       desc: 'Extra large — accessibility friendly' },
+  { value: 'xxl',      label: '🔠 2XL',      desc: 'Maximum size — very few items per page' },
   { value: 'custom',   label: '⚙️ Custom',   desc: 'Set exact point sizes manually' },
 ];
 
@@ -76,11 +80,13 @@ export const charsPerLine = (panelWidthIn, bodyPt) => {
   // Linear inverse scaling (9/bodyPt) overcounts wrapping at larger sizes.
   
   const CPI_BY_PT = {
-    8: 13.5,
-    9: 12.5,
+    8:  13.5,
+    9:  12.5,
     10: 12.5,
     11: 10.5,
-    12: 9.8,
+    12:  10.2,
+    14:  8.8,
+    17:  7.2,
   };
 
   const cpi = CPI_BY_PT[bodyPt] ?? (8.0 * Math.pow(bodyPt / 9, 0.3));

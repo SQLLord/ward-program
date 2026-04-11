@@ -18,7 +18,7 @@ export function ErrorDisplay() {
   if (errors.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed bottom-4 right-4 z-[10000] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
       {errors.map(error => {
         const config = TYPE_CONFIG[error.type] ?? TYPE_CONFIG.info;
         return (

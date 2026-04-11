@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useError } from '../context/ErrorContext';
 import { apiBase, getCsrfToken } from '../utils/api';  // ← add getCsrfToken
 import { useNavigate } from 'react-router-dom';
+import { uploadUrlToLibrary } from '../utils/imageUtils';
 
 function ImageLibrary() {
   const { showToast } = useError();
@@ -15,6 +16,9 @@ function ImageLibrary() {
   const fileInputRef = useRef(null);
   const [uploadProgress, setUploadProgress] = useState(null); // { done, total }
   const [confirmDelete, setConfirmDelete] = useState(null); // img object to delete
+  const [showUrlUpload, setShowUrlUpload] = useState(false);
+  const [urlInput, setUrlInput]           = useState('');
+  const [urlUploading, setUrlUploading]   = useState(false);
 
   // ── Load library on mount ───────────────────────────────────────────────────
   // AFTER — call inline so there's no dependency on the function reference
@@ -119,6 +123,47 @@ function ImageLibrary() {
     e.target.value = '';
   };
 
+  const handleUrlUpload = async () => {
+    const url = urlInput.trim();
+    if (!url) return;
+
+    try {
+        const parsed = new URL(url);
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+            showToast('⚠️ Only http:// and https:// URLs are allowed.', 'error');
+            return;
+        }
+    } catch {
+        showToast('⚠️ Invalid URL.', 'error');
+        return;
+    }
+
+    setUrlUploading(true);
+    try {
+        const { id, fileName, ...rest } = await uploadUrlToLibrary(url);
+        // Re-fetch the full image record so we get fileSizeKb, uploadedAt etc.
+        const res = await fetch(`${apiBase}/api/images`, { credentials: 'include' });
+        if (res.ok) {
+            const data = await res.json();
+            const newImg = data.find(i => i.id === id);
+            if (newImg) setImages(prev => [newImg, ...prev]);
+        }
+        showToast(`✅ Image uploaded to library: ${fileName}`);
+        setUrlInput('');
+        setShowUrlUpload(false);
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            showToast('⚠️ Upload timed out — your connection may be slow. Please try again.', 'error');
+        } else if (err.message === 'AUTH') {
+            showToast('⚠️ Session expired — please log out and back in.', 'error');
+        } else {
+            showToast(`⚠️ Upload failed: ${err.message}`, 'error');
+        }
+    } finally {
+        setUrlUploading(false);
+    }
+  };
+
   // ── Delete ────────────────────────────────────────────────────────────────────
   const handleDeleteClick = (img) => {
     setConfirmDelete(img);
@@ -168,22 +213,26 @@ function ImageLibrary() {
         </div>
         
        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/admin')}
-            className="btn-secondary"
-          >
+        <button onClick={() => navigate('/admin')} className="btn-secondary">
             ← Back to Dashboard
-          </button>
-          <button
+        </button>
+        <button
+            onClick={() => setShowUrlUpload(v => !v)}
+            disabled={uploading || urlUploading}
+            className="btn-secondary flex items-center gap-2"
+        >
+            🔗 Upload from URL
+        </button>
+        <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
+            disabled={uploading || urlUploading}
             className="btn-primary flex items-center gap-2"
-          >
+        >
             {uploading
-              ? uploadProgress
-                ? `⏳ Uploading ${uploadProgress.done}/${uploadProgress.total}...`
-                : '⏳ Uploading...'
-              : '⬆️ Upload Images'}
+                ? uploadProgress
+                    ? `⏳ Uploading ${uploadProgress.done}/${uploadProgress.total}...`
+                    : '⏳ Uploading...'
+                : '⬆️ Upload Images'}
           </button>
         </div>
         <input
@@ -195,6 +244,46 @@ function ImageLibrary() {
           className="hidden"
         />
       </div>
+
+      {/* ── URL Upload Panel ── */}
+      {showUrlUpload && (
+          <div className="bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200
+                          dark:border-slate-700 px-4 py-4 mb-6 flex flex-col gap-3">
+              <p className="text-sm font-semibold dark:text-slate-100">
+                  🔗 Upload Image from URL
+              </p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">
+                  Paste a direct image URL — it will be fetched and saved to your library.
+              </p>
+              <div className="flex gap-2">
+                  <input
+                      type="text"
+                      value={urlInput}
+                      onChange={e => setUrlInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleUrlUpload()}
+                      placeholder="https://example.com/image.jpg"
+                      className="input flex-1 text-sm"
+                      maxLength={2048}
+                      disabled={urlUploading}
+                      autoFocus
+                  />
+                  <button
+                      onClick={handleUrlUpload}
+                      disabled={!urlInput.trim() || urlUploading}
+                      className="btn-primary px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                      {urlUploading ? '⏳ Uploading...' : '⬆️ Upload'}
+                  </button>
+                  <button
+                      onClick={() => { setShowUrlUpload(false); setUrlInput(''); }}
+                      disabled={urlUploading}
+                      className="btn-secondary px-3"
+                  >
+                      Cancel
+                  </button>
+              </div>
+          </div>
+      )}
 
       {/* ── Stats bar ── */}
       {!loading && (

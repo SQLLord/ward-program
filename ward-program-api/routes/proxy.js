@@ -44,7 +44,7 @@ router.get('/image', verifyToken, async (req, res) => {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 20000);
 
     const response = await fetch(url, {
       signal: controller.signal,
