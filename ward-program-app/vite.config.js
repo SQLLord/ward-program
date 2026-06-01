@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
 
     // ── Production build optimizations ─────────────────────────────────────
     build: {
+      target: 'esnext',
       sourcemap: false,
       chunkSizeWarningLimit: 600,
       rollupOptions: {

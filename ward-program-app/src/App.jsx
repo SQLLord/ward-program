@@ -21,6 +21,8 @@ import ImageLibrary from './pages/ImageLibrary';
 import AnnouncementRequests from './pages/AnnouncementRequests';
 import AnnouncementRequestEdit from './pages/AnnouncementRequestEdit';
 import TemplateManager from './pages/TemplateManager';
+import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
+import { reactPlugin } from './AppInsights';
 
 
 
@@ -190,39 +192,41 @@ function NavBar() {
 // ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   return (
-    <DarkModeProvider>                        {/* ← ADDED — outermost wrapper */}
-      <ErrorBoundary>
-        <AuthProvider>
-          <UserProvider>
-            <ProgramProvider>
-              <ErrorProvider>
-                <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
-                  <ErrorDisplay />
-                  <NavBar />
-                  <Routes>
-                    {/* ✅ PUBLIC ROUTES */}
-                    <Route path="/"            element={<ProgramHome />} />
-                    <Route path="/view/:id"    element={<ProgramViewer />} />
-                    <Route path="/login"       element={<Login />} />
-                    {/* 🔒 PROTECTED ROUTES */}
-                    <Route path="/admin"       element={<ProtectedRoute roles={['bishopric', 'editor']}><AdminDashboard /></ProtectedRoute>} />
-                    <Route path="/builder/:id" element={<ProtectedRoute roles={['bishopric', 'editor']}><ProgramBuilder /></ProtectedRoute>} />
-                    <Route path="/users"       element={<ProtectedRoute roles={['bishopric']}><UserManager /></ProtectedRoute>} />
-                    <Route path="/builder"     element={<ProtectedRoute roles={['bishopric', 'editor']}><ProgramBuilder /></ProtectedRoute>} />
-                    <Route path="/change-password" element={<ProtectedRoute roles={['bishopric', 'editor']}><ChangePassword /></ProtectedRoute>} />
-                    <Route path="/ward-defaults" element={<ProtectedRoute roles={['bishopric']}><WardDefaults /></ProtectedRoute>} />
-                    <Route path="/admin/image-library" element={<ProtectedRoute roles={['bishopric', 'editor']}><ImageLibrary /></ProtectedRoute>} />
-                    <Route path="/announcement-requests" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequests /></ProtectedRoute>} />
-                    <Route path="/announcement-requests/:id/edit" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequestEdit /></ProtectedRoute>} />
-                    <Route path="/admin/templates" element={<ProtectedRoute roles={['bishopric', 'editor']}><TemplateManager /></ProtectedRoute>} />
-                  </Routes>
-                </Router>
-              </ErrorProvider>
-            </ProgramProvider>
-          </UserProvider>
-        </AuthProvider>
-      </ErrorBoundary>
-    </DarkModeProvider>                       
+    <AppInsightsContext.Provider value={reactPlugin}>
+      <DarkModeProvider>                       
+        <ErrorBoundary>
+          <AuthProvider>
+            <UserProvider>
+              <ProgramProvider>
+                <ErrorProvider>
+                  <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+                    <ErrorDisplay />
+                    <NavBar />
+                    <Routes>
+                      {/* ✅ PUBLIC ROUTES */}
+                      <Route path="/"            element={<ProgramHome />} />
+                      <Route path="/view/:id"    element={<ProgramViewer />} />
+                      <Route path="/login"       element={<Login />} />
+                      {/* 🔒 PROTECTED ROUTES */}
+                      <Route path="/admin"       element={<ProtectedRoute roles={['bishopric', 'editor']}><AdminDashboard /></ProtectedRoute>} />
+                      <Route path="/builder/:id" element={<ProtectedRoute roles={['bishopric', 'editor']}><ProgramBuilder /></ProtectedRoute>} />
+                      <Route path="/users"       element={<ProtectedRoute roles={['bishopric']}><UserManager /></ProtectedRoute>} />
+                      <Route path="/builder"     element={<ProtectedRoute roles={['bishopric', 'editor']}><ProgramBuilder /></ProtectedRoute>} />
+                      <Route path="/change-password" element={<ProtectedRoute roles={['bishopric', 'editor']}><ChangePassword /></ProtectedRoute>} />
+                      <Route path="/ward-defaults" element={<ProtectedRoute roles={['bishopric']}><WardDefaults /></ProtectedRoute>} />
+                      <Route path="/admin/image-library" element={<ProtectedRoute roles={['bishopric', 'editor']}><ImageLibrary /></ProtectedRoute>} />
+                      <Route path="/announcement-requests" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequests /></ProtectedRoute>} />
+                      <Route path="/announcement-requests/:id/edit" element={<ProtectedRoute roles={['bishopric', 'editor']}><AnnouncementRequestEdit /></ProtectedRoute>} />
+                      <Route path="/admin/templates" element={<ProtectedRoute roles={['bishopric', 'editor']}><TemplateManager /></ProtectedRoute>} />
+                    </Routes>
+                  </Router>
+                </ErrorProvider>
+              </ProgramProvider>
+            </UserProvider>
+          </AuthProvider>
+        </ErrorBoundary>
+      </DarkModeProvider>
+    </AppInsightsContext.Provider>                        
   );
 }
 
