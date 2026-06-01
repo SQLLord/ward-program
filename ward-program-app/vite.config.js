@@ -22,11 +22,13 @@ export default defineConfig(({ mode }) => {
       },
     },
 
-    // ── Dep pre-bundling — use esnext so esbuild doesn't try to downcompile
+    // ── Dep pre-bundling — use esnext so rolldown doesn't try to downcompile
     //    modern syntax in packages like @dnd-kit ──────────────────────────────
     optimizeDeps: {
-      esbuildOptions: {
-        target: 'esnext',
+      rolldownOptions: {
+        output: {
+          target: 'esnext',
+        },
       },
     },
 
@@ -34,26 +36,19 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'esnext',
       sourcemap: false,
-      chunkSizeWarningLimit: 600,
+      chunkSizeWarningLimit: 700,
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': [
-              'react',
-              'react-dom',
-              'react-router-dom',
-            ],
-            'vendor-pdf': [
-              'jspdf',
-              'jspdf-autotable',  // ← add this, it's currently landing in index
-              'html2canvas',
-            ],
-            'vendor-dnd': [
-              '@dnd-kit/core',
-              '@dnd-kit/sortable',
-              '@dnd-kit/modifiers',
-              '@dnd-kit/utilities',
-            ],
+          manualChunks(id) {
+            if (id.includes('/node_modules/react') || id.includes('/node_modules/react-dom') || id.includes('/node_modules/react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('/node_modules/jspdf') || id.includes('/node_modules/jspdf-autotable') || id.includes('/node_modules/html2canvas')) {
+              return 'vendor-pdf';
+            }
+            if (id.includes('/node_modules/@dnd-kit/')) {
+              return 'vendor-dnd';
+            }
           },
         },
       },
