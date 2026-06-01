@@ -4,15 +4,21 @@ import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
 
 const reactPlugin = new ReactPlugin();
 
-const appInsights = new ApplicationInsights({
-  config: {
-    connectionString: import.meta.env.VITE_AI_CONNECTION_STRING,
-    extensions: [reactPlugin],
-    enableAutoRouteTracking: true,
-    disableFetchTracking: false,
-  }
-});
+const connectionString = import.meta.env.VITE_AI_CONNECTION_STRING;
 
-appInsights.loadAppInsights();
+const appInsights = connectionString
+  ? new ApplicationInsights({
+      config: {
+        connectionString,
+        extensions: [reactPlugin],
+        enableAutoRouteTracking: true,
+        disableFetchTracking: false,
+      }
+    })
+  : null;
+
+if (appInsights) {
+  appInsights.loadAppInsights();
+}
 
 export { reactPlugin, appInsights };

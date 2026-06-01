@@ -51,16 +51,18 @@ function ProgramViewer() {
   }, [id]);
 
   useEffect(() => {
-    loadWardDefaults().then(d =>
-      setWardDefaults(d ?? { leadership: [], schedules: [] })
-    );
+    loadWardDefaults().then(d => {
+      const defaults = d ?? { leadership: [], schedules: [] };
+      setWardDefaults(prev => ({ ...prev, leadership: defaults.leadership, schedules: defaults.schedules }));
+    });
  }, [loadWardDefaults]);
 
 
   useEffect(() => {
-      loadWardName().then(({ wardName, stakeName }) => {
+      loadWardName().then(({ wardName, stakeName, qrCodeUrl, qrCodeLabel }) => {
           setWardName(wardName);
           setStakeName(stakeName);
+          setWardDefaults(prev => ({ ...prev, qrCodeUrl: qrCodeUrl ?? '', qrCodeLabel: qrCodeLabel ?? '' }));
       });
   }, [loadWardName]);
 

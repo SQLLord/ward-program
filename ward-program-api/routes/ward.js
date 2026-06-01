@@ -20,6 +20,8 @@ const mapWardSettings = (row) => ({
     updatedAt:           row.updated_at ?? null,
     updatedBy:           row.updated_by ?? null,
     wardUrl:             row.ward_url ?? '',
+    qrCodeUrl:           row.qr_code_url ?? '',
+    qrCodeLabel:         row.qr_code_label ?? '',
 });
 
 
@@ -42,7 +44,8 @@ router.get('/settings', verifyToken, requireRole('bishopric', 'editor'), async (
 router.put('/settings', verifyToken, requireRole('bishopric', 'editor'), async (req, res) => {
   try {
       const { wardName, stakeName, viewPassword,
-              announcementEmails, announcementEnabled, wardUrl, contactEmails } = req.body; 
+              announcementEmails, announcementEnabled, wardUrl, contactEmails,
+              qrCodeUrl, qrCodeLabel } = req.body; 
 
     if (!wardName?.trim()) {
       return res.status(400).json({ error: 'Ward name is required.' });
@@ -84,6 +87,8 @@ router.put('/settings', verifyToken, requireRole('bishopric', 'editor'), async (
       .input('announcement_enabled', sql.Bit,            announcementEnabled !== false ? 1 : 0)
       .input('ward_url',             sql.NVarChar(500), wardUrl?.trim() ?? null)
       .input('contact_emails',       sql.NVarChar(2000), contactEmails?.trim() ?? null)
+      .input('qr_code_url',          sql.NVarChar(500), qrCodeUrl?.trim() || null)
+      .input('qr_code_label',        sql.NVarChar(200), qrCodeLabel?.trim() || null)
       .execute('dbo.usp_SaveWardSettings');
 
     
@@ -105,15 +110,17 @@ router.get('/name', async (_req, res) => {
     const r = await getPool().request().execute('dbo.usp_GetWardSettings');
     const row = r.recordset[0];
 
-
-    // ← L2 FIX: cache ward name for 5 minutes — rarely changes, saves DB hits
-    res.set('Cache-Control', 'public, max-age=300');
+    // ProgramContext caches this in-memory per session — no HTTP cache needed,
+    // and HTTP caching breaks the QR/settings update flow.
+    res.set('Cache-Control', 'no-store');
 
 
     return res.json({
-      wardName: row?.ward_name ?? '',
-      stakeName: row?.stake_name ?? null,
-      wardUrl:   row?.ward_url   ?? '',
+      wardName:    row?.ward_name    ?? '',
+      stakeName:   row?.stake_name   ?? null,
+      wardUrl:     row?.ward_url     ?? '',
+      qrCodeUrl:   row?.qr_code_url  ?? '',
+      qrCodeLabel: row?.qr_code_label ?? '',
     });
   } catch (err) {
     console.error('[Ward] GET /name error:', err);

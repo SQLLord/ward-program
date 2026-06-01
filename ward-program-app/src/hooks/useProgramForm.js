@@ -106,10 +106,10 @@ export function useProgramForm(id) {
   const [stakeName, setStakeName]           = useState('');
 
   useEffect(() => {
-    loadWardName().then(({ wardName, stakeName }) => {
+    loadWardName().then(({ wardName, stakeName, qrCodeUrl, qrCodeLabel }) => {
       setWardName(wardName);
       setStakeName(stakeName);
-      
+      setWardDefaults(prev => ({ ...prev, qrCodeUrl: qrCodeUrl ?? '', qrCodeLabel: qrCodeLabel ?? '' }));
     });
   }, [loadWardName]);
   
@@ -290,7 +290,8 @@ export function useProgramForm(id) {
   // ============================================================
   useEffect(() => {
     loadWardDefaults().then(defaults => {
-      setWardDefaults(defaults ?? { leadership: [], schedules: [] });
+      const d = defaults ?? { leadership: [], schedules: [] };
+      setWardDefaults(prev => ({ ...prev, leadership: d.leadership, schedules: d.schedules }));
     });
   }, [loadWardDefaults]);
 

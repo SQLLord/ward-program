@@ -172,6 +172,14 @@ const calcLeadership = (formData, wardDefaults) => {
         used += maxLines * scaledRowH;
     }
   }
+  // Reserve space for QR code if configured in ward settings
+  if (wardDefaults?.qrCodeUrl?.trim()) {
+    const QR_SIZE    = 0.9;
+    const QR_LABEL_H = wardDefaults.qrCodeLabel?.trim() ? 0.18 : 0;
+    const QR_GAP     = 0.10;
+    used += QR_SIZE + QR_LABEL_H + QR_GAP;
+  }
+
   if (used / PANEL_HEIGHT_IN > 0.90) {
     warnings.push('Leadership and schedules panel is getting full. Consider reducing entries.');
   }

@@ -31,7 +31,7 @@ const newSchedule = () => ({ _key: Date.now() + Math.random(), organization: '',
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function WardDefaults() {
   const navigate = useNavigate();
-  const { invalidateWardDefaultsCache } = useProgramContext();
+  const { invalidateWardDefaultsCache, invalidateWardNameCache } = useProgramContext();
   const [tab, setTab] = useState('leadership');
   const [leadership, setLeadership] = useState([]);
   const [schedules, setSchedules] = useState([]);
@@ -46,7 +46,9 @@ export default function WardDefaults() {
       hasViewPassword: false,
       announcementEmails: '',       // ← ADD
       announcementEnabled: true,    // ← ADD
-      contactEmails: '', 
+      contactEmails: '',
+      qrCodeUrl: '',
+      qrCodeLabel: '',
   });
 
   const [viewPassword, setViewPassword] = useState('');
@@ -79,6 +81,8 @@ export default function WardDefaults() {
             announcementEnabled: settingsData.announcementEnabled !== false, // ← ADD
             wardUrl:             settingsData.wardUrl ?? '', // ← ADD
             contactEmails:       settingsData.contactEmails ?? '',  // ← ADD
+            qrCodeUrl:           settingsData.qrCodeUrl   ?? '',
+            qrCodeLabel:         settingsData.qrCodeLabel ?? '',
         });
 
       } catch (err) {
@@ -174,6 +178,8 @@ export default function WardDefaults() {
             announcementEmails:  settings.announcementEmails ?? '',   // ← ADD
             announcementEnabled: settings.announcementEnabled,         // ← ADD
             contactEmails:       settings.contactEmails ?? '',   // ← ADD
+            qrCodeUrl:           settings.qrCodeUrl?.trim()   || null,
+            qrCodeLabel:         settings.qrCodeLabel?.trim()  || null,
         });
 
       if (result.passwordChanged) {
@@ -184,6 +190,7 @@ export default function WardDefaults() {
       setConfirmPwd('');
       setTestPwd('');
       setTestResult(null);
+      invalidateWardNameCache();
       setDirtySettings(false);
       showToast('✅ Ward settings saved!');
     } catch (err) {
@@ -436,6 +443,33 @@ export default function WardDefaults() {
                     />
                     <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                       Shown as a button on the public program page.
+                    </p>
+                  </div>
+
+                  {/* QR Code for Printed Program */}
+                  <div>
+                    <label className="label font-semibold">
+                      📱 Program QR Code URL{' '}
+                      <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={settings.qrCodeUrl ?? ''}
+                      onChange={e => { setSettings(s => ({ ...s, qrCodeUrl: e.target.value })); setDirtySettings(true); }}
+                      placeholder="https://..."
+                      className="input w-full mt-1"
+                      maxLength={500}
+                    />
+                    <input
+                      type="text"
+                      value={settings.qrCodeLabel ?? ''}
+                      onChange={e => { setSettings(s => ({ ...s, qrCodeLabel: e.target.value })); setDirtySettings(true); }}
+                      placeholder="Label (optional, e.g. Our Ward Website)"
+                      className="input w-full mt-1"
+                      maxLength={200}
+                    />
+                    <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                      Printed as a QR code on the leadership &amp; schedules panel of every program.
                     </p>
                   </div>
 

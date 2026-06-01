@@ -1,5 +1,6 @@
 // PDFGenerator.js — with per-panel dynamic font sizes
 import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 import { fetchUrlAsBase64 } from '../utils/imageUtils';
 import { resolveImgHeight, COVER_PANEL_HEIGHT_IN } from '../utils/coverImageUtils';
 import { getResolvedSizes } from '../utils/printSettingsUtils';
@@ -178,6 +179,27 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
         leaderSizes
       );
 
+    }
+
+    // ── QR Code (pinned to bottom of leadership & schedules panel) ─────────────
+    if (wardDefaults.qrCodeUrl?.trim()) {
+      try {
+        const qrDataUrl = await QRCode.toDataURL(wardDefaults.qrCodeUrl.trim(), { width: 120, margin: 1 });
+        const qrSize  = 0.9;
+        const labelH  = wardDefaults.qrCodeLabel?.trim() ? 0.18 : 0;
+        const qrX     = margin + (halfWidth - qrSize) / 2;
+        const qrY     = pageHeight - margin - qrSize - labelH;
+        pdf.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+        if (wardDefaults.qrCodeLabel?.trim()) {
+          pdf.setFontSize(7);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(80, 80, 80);
+          pdf.text(wardDefaults.qrCodeLabel.trim(), margin + halfWidth / 2, qrY + qrSize + 0.14, { align: 'center' });
+          pdf.setTextColor(0, 0, 0);
+        }
+      } catch (e) {
+        logger.warn('[PDF] QR code generation failed:', e.message);
+      }
     }
 
     // Center line — Page 1

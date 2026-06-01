@@ -30,6 +30,10 @@ export const ProgramProvider = ({ children }) => {
   const invalidateWardDefaultsCache = useCallback(() => {
     wardDefaultsCache.current = null;
   }, []);
+
+  const invalidateWardNameCache = useCallback(() => {
+    wardNameCacheRef.current = null;
+  }, []);
   // ────────────────────────────────────────────────────────────────────────
 
   const loadPrograms = useCallback(async () => {
@@ -192,14 +196,16 @@ export const ProgramProvider = ({ children }) => {
       const data = await api.get('/ward/name');
       // ✅ Cache the full object — wardName AND stakeName
       wardNameCacheRef.current = {
-        wardName:  data.wardName  ?? '',
-        stakeName: data.stakeName ?? null,
-        wardUrl:   data.wardUrl   ?? '',
+        wardName:    data.wardName    ?? '',
+        stakeName:   data.stakeName   ?? null,
+        wardUrl:     data.wardUrl     ?? '',
+        qrCodeUrl:   data.qrCodeUrl   ?? '',
+        qrCodeLabel: data.qrCodeLabel ?? '',
       };
       return wardNameCacheRef.current;
     } catch (err) {
       logger.error('[ProgramContext] loadWardName error:', err);
-      return { wardName: '', stakeName: null, wardUrl: '' };
+      return { wardName: '', stakeName: null, wardUrl: '', qrCodeUrl: '', qrCodeLabel: '' };
     }
   }, []);
 
@@ -207,7 +213,7 @@ export const ProgramProvider = ({ children }) => {
     <ProgramContext.Provider value={{
       programs, currentProgram, loading, error,
       loadPrograms, loadPublishedByDate, loadWardDefaults,
-      invalidateWardDefaultsCache,                          // ← ADD to context
+      invalidateWardDefaultsCache, invalidateWardNameCache,
       createProgram, saveProgram,
       publishProgram, publishProgramExclusive, publishProgramBoth,
       unpublishProgram, archiveProgram, loadWardName,

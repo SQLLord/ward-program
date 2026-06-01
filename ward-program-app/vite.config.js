@@ -22,6 +22,14 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    // ── Dep pre-bundling — use esnext so esbuild doesn't try to downcompile
+    //    modern syntax in packages like @dnd-kit ──────────────────────────────
+    optimizeDeps: {
+      esbuildOptions: {
+        target: 'esnext',
+      },
+    },
+
     // ── Production build optimizations ─────────────────────────────────────
     build: {
       target: 'esnext',
