@@ -51,6 +51,10 @@ function getMeetingSummary(item) {
       return item.text?.trim()
         ? `📝 Custom — "${item.text.trim().substring(0, 40)}${item.text.trim().length > 40 ? '…' : ''}"`
         : `📝 Custom — (spacing)`;
+    case 'nextWeekTopics':
+      return item.text?.trim()
+        ? `📅 Next Week Topics — "${item.text.trim().substring(0, 40)}${item.text.trim().length > 40 ? '…' : ''}"`
+        : `📅 Next Week Topics — (empty)`;
     default:
       return `📋 ${item.type}`;
   }
@@ -320,6 +324,23 @@ export function MeetingItemRow({ item, updateMeetingItem, removeMeetingItem, isN
                   📐 Blank — will reserve 2 lines of space in PDF
                 </p>
               )}
+            </div>
+          )}
+
+          {/* NEXT WEEK TOPICS */}
+          {item.type === 'nextWeekTopics' && (
+            <div>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">
+                Topics / speakers for next week's sacrament meeting (printed in smaller text)
+              </p>
+              <textarea
+                value={item.text ?? ''}
+                onChange={e => updateMeetingItem(item.id, 'text', e.target.value)}
+                className="input w-full text-xs"
+                placeholder="e.g. Speaker: Jane Smith — Faith\nSpeaker: John Doe — Repentance"
+                rows={3}
+                maxLength={500}
+              />
             </div>
           )}
 

@@ -1,6 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-lds-blue: #0f3d5c;
+  --color-lds-gold: #d4af37;
+}
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */
 /* ── Light mode base — off-white page background ─────────────────────────── */
@@ -166,7 +171,7 @@ html.dark body {
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn-primary {
-  @apply bg-lds-blue text-white px-6 py-3 rounded-lg hover:bg-opacity-90 font-semibold transition;
+  @apply bg-lds-blue text-white px-6 py-3 rounded-lg hover:bg-lds-blue/90 font-semibold transition;
   @apply dark:bg-blue-600 dark:hover:bg-blue-500;
 }
 

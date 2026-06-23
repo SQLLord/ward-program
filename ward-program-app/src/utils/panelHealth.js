@@ -274,6 +274,19 @@ const calcMeetingOrder = (formData) => {
         break;
       }
 
+      case 'nextWeekTopics': {
+        // Header line: "Next Week in Sacrament Meeting" at subPt
+        used += sizes.subLineH + 0.04;
+        const topicsText = item.text?.trim() ?? '';
+        if (topicsText) {
+          const lines = estimateLines(topicsText, CONTENT_WIDTH - 0.15, sizes.subPt);
+          used += Math.max(1, lines) * sizes.subLineH + 0.10;
+        } else {
+          used += sizes.subLineH;
+        }
+        break;
+      }
+
 
 
       case 'musical':

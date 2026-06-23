@@ -298,6 +298,15 @@ export function StepPreviewPanel({
                             ? <span className="italic text-center block text-gray-500 dark:text-slate-400">{item.text}</span>
                             : <span className="block h-[2em] border-l-2 border-dashed border-amber-400 dark:border-amber-600 ml-1 opacity-60" title="Spacing block — 2 blank lines in PDF" />
                         )}
+                        {item.type === 'nextWeekTopics' && (
+                          <span>
+                            <span className="font-bold block">Next Week in Sacrament Meeting</span>
+                            <span className="block ml-2 italic text-gray-600 dark:text-slate-400 whitespace-pre-line"
+                                  style={{ fontSize: `${sizes.subPt}pt` }}>
+                              {item.text?.trim() || '(no topics entered)'}
+                            </span>
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>

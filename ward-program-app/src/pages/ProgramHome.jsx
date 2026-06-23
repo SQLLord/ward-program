@@ -670,6 +670,18 @@ function ProgramHome() {
                     );
                   }
 
+                  // ── Next Week Topics ───────────────────────────────────────
+                  if (item.type === 'nextWeekTopics') {
+                    return (
+                      <div key={i}>
+                        <p className="font-bold text-sm">Next Week in Sacrament Meeting</p>
+                        <p className="ml-3 text-xs italic text-gray-600 dark:text-slate-400 whitespace-pre-line">
+                          {item.text?.trim() || ''}
+                        </p>
+                      </div>
+                    );
+                  }
+
                   return null;
                 })}
               </div>

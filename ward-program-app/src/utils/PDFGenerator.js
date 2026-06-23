@@ -650,6 +650,26 @@ export const generateProgramPDF = async (programProp, wardDefaults = { leadershi
               }
               break;
             }
+
+            case 'nextWeekTopics': {
+              const topicsText = item.text?.trim() ?? '';
+              pdf.setFontSize(meetSizes.subPt);
+              pdf.setFont('helvetica', 'bolditalic');
+              pdf.text('Next Week in Sacrament Meeting',
+                p2RightX + 0.1, yPosMeet);
+              yPosMeet += meetSizes.subLineH + 0.04;
+              if (topicsText) {
+                pdf.setFont('helvetica', 'italic');
+                const topicLines = pdf.splitTextToSize(topicsText, halfWidth - 0.4);
+                pdf.text(topicLines, p2RightX + 0.25, yPosMeet,
+                  { maxWidth: halfWidth - 0.4 });
+                yPosMeet += topicLines.length * meetSizes.subLineH + 0.1;
+              } else {
+                yPosMeet += meetSizes.subLineH;
+              }
+              pdf.setFont('helvetica', 'normal');
+              break;
+            }
             
             case 'announce':
               pdf.setFontSize(meetSizes.bodyPt + 1);

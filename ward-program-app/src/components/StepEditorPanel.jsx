@@ -227,10 +227,10 @@ export function StepEditorPanel({
               <p className="w-full text-xs text-gray-500 dark:text-slate-400 mb-1">Add Items:</p>
               {
               ['openingHymn','openingPrayer','announce','sacramentHymn','sacramentAdmin',
-              'speaker','hymn','childrensHymn','musical','testimony','closingHymn','closingPrayer','baptism','confirmation','customText'
+              'speaker','hymn','childrensHymn','musical','testimony','closingHymn','closingPrayer','baptism','confirmation','customText','nextWeekTopics'
 
               ].map(type => (
-                <button key={type} 
+                <button key={type}
                   onClick={() => {
                     const newId = generateId();
                     setNewMeetingItemId(newId);
@@ -239,11 +239,12 @@ export function StepEditorPanel({
                   }}
 
                   className="btn-primary btn-small">
-                  
+
                   + {({
                       childrensHymn: "Children's Song",
                       customText: 'Custom Text',
                       sacramentAdmin: 'Sacrament Admin',
+                      nextWeekTopics: 'Next Week Topics',
                     }[type] ?? type.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()))}
 
                 </button>
