@@ -1,5 +1,5 @@
 // src/utils/imageUtils.js
-import { apiBase } from './api';
+import { apiBase, getCsrfToken } from './api';
 import { logger } from './logger';
 
 /**
@@ -132,7 +132,8 @@ export const uploadUrlToLibrary = async (url) => {
   const uploadRes = await fetch(`${apiBase}/api/images`, {
     method: 'POST',
     credentials: 'include',
-    signal: uploadController.signal,  // ← ADDED for upload timeout
+    signal: uploadController.signal,
+    headers: { ...(getCsrfToken() ? { 'x-csrf-token': getCsrfToken() } : {}) },
     body: formData,
     // ← No Content-Type header — browser sets multipart boundary automatically
   });
@@ -188,6 +189,7 @@ export const uploadFileToLibrary = async (file) => {
     method: 'POST',
     credentials: 'include',
     signal: uploadController.signal,
+    headers: { ...(getCsrfToken() ? { 'x-csrf-token': getCsrfToken() } : {}) },
     body: formData,
   });
 
