@@ -1,6 +1,6 @@
 // routes/users.js
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { getPool, sql } = require('../db');
 const { verifyToken } = require('../middleware/auth');
 const { requireRole } = require('../middleware/requireRole');
