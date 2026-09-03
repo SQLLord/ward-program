@@ -18,7 +18,7 @@
     "@microsoft/applicationinsights-react-js": "^19.4.1",
     "@microsoft/applicationinsights-web": "^3.4.3",
     "@tailwindcss/postcss": "^4.3.3",
-    "dompurify": "^3.4.13",
+    "dompurify": "^3.4.14",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "qrcode": "^1.5.4",
@@ -27,11 +27,11 @@
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.5",
+    "@vitejs/plugin-react": "^6.1.0",
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.2.1"
+    "vite": "^8.2.2"
   },
   "overrides": {
     "esbuild": ">=0.25.0"

@@ -122,13 +122,22 @@ export function MeetingItemRow({ item, updateMeetingItem, removeMeetingItem, isN
             <div className="grid grid-cols-12 gap-1 items-center">
               <input
                 value={item.number ?? ''}
-                onChange={e => updateMeetingItem(item.id, 'number', e.target.value.trim())}
+                onChange={e => {
+                  let val = e.target.value.replace(/\D/g, '');
+                  if (val.length > 0) val = val.slice(0, val[0] === '1' ? 4 : 3);
+                  updateMeetingItem(item.id, 'number', val);
+                }}
                 className="input col-span-2 text-center px-2 text-xs"
                 placeholder="#"
-                maxLength={10}
+                inputMode="numeric"
               />
-              <span className="col-span-7 text-xs text-slate-400 truncate">
-                {item.title ?? 'Title auto-fills from hymn number'}
+              <span className="col-span-7 text-xs truncate">
+                {!item.number
+                  ? <span className="text-slate-400">Title auto-fills from hymn number</span>
+                  : item.title
+                    ? <span className="text-slate-400">{item.title}</span>
+                    : <span className="text-red-400 font-medium">— Not Found —</span>
+                }
               </span>
               {item.number && item.title
                 ? <div className="col-span-2"><HymnLink number={item.number} title={item.title} /></div>
@@ -148,13 +157,25 @@ export function MeetingItemRow({ item, updateMeetingItem, removeMeetingItem, isN
                 <div className="grid grid-cols-12 gap-2 items-center">
                   <input
                     value={item.number ?? ''}
-                    onChange={e => updateMeetingItem(item.id, 'number', e.target.value.trim())}
+                    onChange={e => {
+                      const raw = e.target.value.toLowerCase();
+                      const filtered = raw.replace(/[^0-9a-d]/g, '');
+                      const digits = filtered.replace(/[a-d]/g, '');
+                      const letter = (filtered.match(/[a-d]/) || [])[0] ?? '';
+                      const val = (digits + letter).slice(0, 4);
+                      updateMeetingItem(item.id, 'number', val);
+                    }}
                     className="input col-span-2 text-center px-2 text-xs"
                     placeholder="#"
-                    maxLength={10}
+                    inputMode="numeric"
                   />
-                  <span className="col-span-7 text-xs text-gray-500 dark:text-slate-400 truncate">
-                    {item.title ?? "Title auto-fills from children's song number"}
+                  <span className="col-span-7 text-xs truncate">
+                    {!item.number
+                      ? <span className="text-gray-500 dark:text-slate-400">Title auto-fills from children's song number</span>
+                      : item.title
+                        ? <span className="text-gray-500 dark:text-slate-400">{item.title}</span>
+                        : <span className="text-red-400 font-medium">— Not Found —</span>
+                    }
                   </span>
                   <div className="col-span-3 flex justify-end">
                     {item.number && item.title
