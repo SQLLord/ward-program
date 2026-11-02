@@ -16,26 +16,27 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@microsoft/applicationinsights-react-js": "^19.4.1",
-    "@microsoft/applicationinsights-web": "^3.4.3",
+    "@microsoft/applicationinsights-react-js": "^19.4.2",
+    "@microsoft/applicationinsights-web": "^3.4.5",
     "@tailwindcss/postcss": "^4.3.3",
-    "dompurify": "^3.4.14",
+    "dompurify": "^3.4.17",
     "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.8",
+    "jspdf-autotable": "^5.0.9",
     "qrcode": "^1.5.4",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.1.0",
-    "autoprefixer": "^10.5.4",
-    "postcss": "^8.5.26",
-    "serve": "^14.2.4",
+    "@vitejs/plugin-react": "^6.2.1",
+    "autoprefixer": "^10.6.2",
+    "postcss": "^8.5.32",
+    "serve": "^14.2.6",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.2.2"
+    "vite": "^8.3.5"
   },
   "overrides": {
-    "esbuild": ">=0.25.0"
+    "esbuild": ">=0.25.0",
+    "compression": ">=1.8.2"
   }
 }

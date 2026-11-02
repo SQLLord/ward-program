@@ -435,7 +435,15 @@ export const HYMNS = {
   1071: { title: "What God Calls Us To", slug: "what-god-calls-us-to" },
   1072: { title: "When I Survey the Wondrous Cross", slug: "when-i-survey-the-wondrous-cross" },
 
-  // --- Seasonal Hymns (1201–1210) ---
+  // --- Batch 6 (2026) ---
+  1073: { title: "Be Thou My Vision", slug: "be-thou-my-vision" },
+  1074: { title: "Our Savior Brings Us Joy", slug: "our-savior-brings-us-joy" },
+  1075: { title: "Jesus Is the Strength of Youth", slug: "jesus-is-the-strength-of-youth" },
+  1076: { title: "How I Love the House of God", slug: "how-i-love-the-house-of-god" },
+  1077: { title: "God’s Armor", slug: "gods-armor" },
+  1078: { title: "Seek Peace", slug: "seek-peace" },
+
+  // --- Seasonal Hymns (1201–1212) ---
   1201: { title: "Hail the Day That Sees Him Rise", slug: "hail-the-day-that-sees-him-rise" },
   1202: { title: "He Is Born, the Divine Christ Child", slug: "he-is-born-the-divine-christ-child" },
   1203: { title: "What Child Is This?", slug: "what-child-is-this" },
@@ -446,6 +454,8 @@ export const HYMNS = {
   1208: { title: "Go Tell It on the Mountain", slug: "go-tell-it-on-the-mountain" },
   1209: { title: "Little Baby in a Manger", slug: "little-baby-in-a-manger" },
   1210: { title: "Long Ago, Within a Garden", slug: "long-ago-within-a-garden" },
+  1211: { title: "O Come, O Come, Emmanuel", slug: "o-come-o-come-emmanuel" },
+  1212: { title: "A Quiet Night", slug: "a-quiet-night" },
 };
 
 
